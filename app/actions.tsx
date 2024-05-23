@@ -9,7 +9,7 @@ export async function loginAction(name: string, passwd: string, role: number): P
         "body": JSON.stringify({
             "loginName": name,
             "password": btoa(passwd),
-            "roleType": 2,
+            "roleType": role,
             "loginType": 1,
             "rememberMe": 2
         }),
@@ -22,5 +22,26 @@ export async function loginAction(name: string, passwd: string, role: number): P
         return json_data["data"]["token"]
     }else {
         throw Error("Login failed. Error: " + json_data["msg"]);
+    }
+}
+
+export async function ValidateTokenAction(token: string): Promise<boolean> {
+    const res = await fetch("https://hfs-be.yunxiao.com/v2/user-center/user-snapshot", {
+        "headers": {
+            "Content-Type": "application/json",
+            "Hfs-token": token
+        },
+        "method": "GET"
+    });
+    if (!res.ok) {throw Error("Validate token failed. Error: " + res.statusText);}
+    const json_data = await res.json()
+    // console.log(json_data)
+    if (json_data["code"] === 3001) {
+        console.log("登录失效")
+        return false
+    }else if (json_data["code"] === 0) {
+        return true
+    }else {
+        throw Error("Validate token failed. Error: " + json_data["msg"]);
     }
 }

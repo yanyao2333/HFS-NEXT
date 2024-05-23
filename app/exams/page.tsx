@@ -2,31 +2,17 @@
 
 import {JSX, SVGProps, useEffect, useState} from "react"
 import {getExamsList} from "@/app/exams/actions";
-
-/** Add fonts into your Next.js project:
-
- import { Arimo } from 'next/font/google'
- import { Judson } from 'next/font/google'
-
- arimo({
- subsets: ['latin'],
- display: 'swap',
- })
-
- judson({
- subsets: ['latin'],
- display: 'swap',
- })
-
- To read more about using these font, please visit the Next.js documentation:
- - App Directory: https://nextjs.org/docs/app/building-your-application/optimizing/fonts
- - Pages Directory: https://nextjs.org/docs/pages/building-your-application/optimizing/fonts
- **/
+import {useRouter} from "next/navigation";
+import {AppRouterInstance} from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 // 卡片组件
-function ExamCard({ name, score, released }: { name: string; score: number; released: string }): JSX.Element {
+function ExamCard({ name, score, released, examId, router }: { name: string; score: number; released: string, examId: string, router: AppRouterInstance }): JSX.Element {
+  async function handleClick() {
+    router.push("/exam/" + examId)
+  }
+
     return (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer">
+        <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer" onClick={handleClick}>
       <div className="p-4 md:p-6 flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold mb-2">{name}</h2>
@@ -56,13 +42,17 @@ function formatTimestamp(timestamp: number) {
   return year + '-' + month + '-' + day
 }
 
-// 主组件
 export default function ExamSelector() {
   const [examList, setExams] = useState<[]>([])
+  const router = useRouter()
 
   useEffect(() => {
     const token = localStorage.getItem("hfs_token")
-    if (!token) {throw Error("token not found")}
+    if (!token) {
+      console.log("你还没登录诶！")
+      router.push("/")
+      return
+    }
     getExamsList(token).then((exams) => {
       let newExams = []
       console.log(exams)
@@ -70,26 +60,25 @@ export default function ExamSelector() {
         newExams.push({
           name: exam["name"],
           score: exam["score"] + "/" + exam["manfen"],
-          released: formatTimestamp(exam["time"])
+          released: formatTimestamp(exam["time"]),
+          examId: exam["examId"],
+          router: router
         })
       }
-      console.log(newExams)
+      // console.log(newExams)
       // @ts-ignore
       setExams(newExams)
     })
-  }, [])
+  }, [router])
 
-  // if (loading) {
-  //   return <p>Loading...</p>
-  // }
     // @ts-ignore
   return (
         <main className="container mx-auto px-4 py-8 md:px-6 md:py-12">
       <h1 className="text-2xl font-bold mb-6 md:text-3xl">考试列表</h1>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {examList.map((exam, index) => (
+        {examList.map((exam: object) => (
             // @ts-ignore
-            <ExamCard key={index} {...exam} />
+            <ExamCard key={exam["key"]} {...exam} />
         ))}
       </div>
     </main>

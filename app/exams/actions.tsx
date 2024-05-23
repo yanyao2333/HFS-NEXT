@@ -10,7 +10,7 @@ export async function getExamsList(token: string): Promise<[]> {
     });
     if (!res.ok) {throw Error("Login failed. Error: " + res.statusText);}
     const json_data = await res.json()
-    console.log(json_data)
+    // console.log(json_data)
     if (json_data["code"] === 0) {
         return json_data["data"]["list"]
     }else {
