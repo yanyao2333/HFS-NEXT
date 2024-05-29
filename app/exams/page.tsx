@@ -8,7 +8,9 @@ import {AppRouterInstance} from "next/dist/shared/lib/app-router-context.shared-
 // 卡片组件
 function ExamCard({ name, score, released, examId, router }: { name: string; score: number; released: string, examId: string, router: AppRouterInstance }): JSX.Element {
   async function handleClick() {
-    router.push("/exam/" + examId)
+    // router.push("/exam/" + examId)
+    // TODO 替换成自己的页面
+    router.push("https://www.haofenshu.com/report/summary?examId=" + examId)
   }
 
     return (
