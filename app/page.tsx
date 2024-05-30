@@ -7,7 +7,7 @@ import { SelectValue, SelectTrigger, SelectItem, SelectContent, Select } from "@
 import { Button } from "@/components/ui/button"
 import {useEffect, useState, useTransition} from "react";
 import {useRouter} from "next/navigation";
-import {loginAction, ValidateTokenAction} from "@/app/actions";
+import {loginAction, validateTokenAction} from "@/app/actions";
 
 
 enum loginRoleType {
@@ -25,10 +25,13 @@ export default function Login() {
     useEffect(() => {
         const token = localStorage.getItem("hfs_token");
         if (token) {
-            ValidateTokenAction(token).then((status) => {
-                if (status) {
+            validateTokenAction(token).then((status) => {
+                if (!status.tokenExpired) {
                     console.log("你已经登录过了！")
                     router.push("/exams")
+                }else if (!status.errMsg) {
+                    alert("在查询是否已登录时发生错误：" + status.errMsg)
+                    return
                 }
             })
         }
@@ -36,9 +39,13 @@ export default function Login() {
 
     async function handleSubmit(): Promise<void> {
         startTransition(async () => {
-                const _token = await loginAction(email, password, Number(mode))
-                localStorage.setItem("hfs_token", _token)
-                router.push("/exams")
+            const _token = await loginAction(email, password, Number(mode))
+            if (!_token.ok) {
+                alert("登录失败，原因：" + _token.payload)
+                return
+            }
+            localStorage.setItem("hfs_token", _token.payload)
+            router.push("/exams")
         })
     }
 

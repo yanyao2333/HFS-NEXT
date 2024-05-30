@@ -1,16 +1,15 @@
 "use client"
 
 import {JSX, SVGProps, useEffect, useState} from "react"
-import {getExamsList} from "@/app/exams/actions";
+import {formatTimestamp} from "@/utils/time"
+import {getExamsList} from "@/app/actions";
 import {useRouter} from "next/navigation";
 import {AppRouterInstance} from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 // 卡片组件
 function ExamCard({ name, score, released, examId, router }: { name: string; score: number; released: string, examId: string, router: AppRouterInstance }): JSX.Element {
   async function handleClick() {
-    // router.push("/exam/" + examId)
-    // TODO 替换成自己的页面
-    router.push("https://www.haofenshu.com/report/summary?examId=" + examId)
+    router.push("/exam/" + examId)
   }
 
     return (
@@ -30,20 +29,6 @@ function ExamCard({ name, score, released, examId, router }: { name: string; sco
 )
 }
 
-function formatTimestamp(timestamp: number) {
-  // 创建一个新的Date对象，使用时间戳作为参数
-  const date = new Date(timestamp);
-
-  const year = date.getFullYear();
-  let month: string | number = date.getMonth() + 1;
-  let day: string | number = date.getDate();
-
-  month = month < 10 ? '0' + month : month;
-  day = day < 10 ? '0' + day : day;
-
-  return year + '-' + month + '-' + day
-}
-
 export default function ExamSelector() {
   const [examList, setExams] = useState<[]>([])
   const router = useRouter()
@@ -51,14 +36,21 @@ export default function ExamSelector() {
   useEffect(() => {
     const token = localStorage.getItem("hfs_token")
     if (!token) {
-      console.log("你还没登录诶！")
+      alert("你还没登录诶！")
       router.push("/")
       return
     }
     getExamsList(token).then((exams) => {
+      if (!exams.ok) {
+        alert("获取考试列表失败：" + exams.errMsg)
+        return
+      }
+      if (!exams.examList) {
+        alert("获取考试列表失败：" + exams.errMsg)
+        return
+      }
       let newExams = []
-      console.log(exams)
-      for (const exam of exams) {
+      for (const exam of exams.examList) {
         newExams.push({
           name: exam["name"],
           score: exam["score"] + "/" + exam["manfen"],

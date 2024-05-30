@@ -6,6 +6,10 @@ const nextConfig = {
                 protocol: 'https',
                 hostname: 'tailwindui.com',
             },
+            {
+                protocol: "https",
+                hostname: "yj-oss.yunxiao.com"
+            }
         ],
     },
 }
