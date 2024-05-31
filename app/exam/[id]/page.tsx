@@ -1,5 +1,5 @@
 "use client"
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/card"
 import {useEffect, useState} from "react"
 import {
   getAnswerPictureAction,
@@ -9,7 +9,6 @@ import {
 } from "@/app/actions";
 import {useRouter, useSearchParams} from "next/navigation";
 import {formatTimestamp} from "@/utils/time";
-import Image from "next/image";
 import {AppRouterInstance} from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 // 包含在试卷详情中的每科粗略信息

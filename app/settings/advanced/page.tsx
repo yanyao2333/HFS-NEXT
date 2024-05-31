@@ -22,10 +22,12 @@ export default function SwitchAdvancedMode() {
     return (
         <div>
             <p className="font-bold text-xl">AdvancedMode: 是否显示被好分数隐藏的内容？（例如最高分、平均分、以及...不可说）</p>
-            <p className="font-bold text-xl">当前AdvancedMode状态为：<span style={{color: "red"}}>{(advancedMode) ? "已开启" : "未开启"}</span>
+            <p className="font-bold text-xl">当前AdvancedMode状态为：{
+                (advancedMode) ? <span style={{color: "green"}}>已开启</span> : <span style={{color: "red"}}>未开启</span>}
             </p>
-            <br/>
-            <input className="h-5 w-5" type="checkbox" id="advancedMode" onChange={(e) => handleSwitchCheckbox(e.target.checked)} checked={advancedMode} />
+                <br/>
+                <input className="h-5 w-5" type="checkbox" id="advancedMode" onChange={(e) => handleSwitchCheckbox(e.target.checked)}
+                checked={advancedMode}/>
             <label htmlFor="advancedMode" className="h-5 w-5">AdvancedMode开关</label>
         </div>
     )
