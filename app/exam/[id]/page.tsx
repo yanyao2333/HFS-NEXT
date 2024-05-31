@@ -119,7 +119,7 @@ function PaperHiddingComponent(props: {paper: Paper, changeDisplayMode: Function
   )
 }
 
-function PaperShowingComponent(props: {paper: Paper, changeDisplayMode: Function, advancedMode: string, router: AppRouterInstance, examId: string}) {
+function PaperShowingComponent(props: {paper: Paper, changeDisplayMode: Function, advancedMode: boolean, router: AppRouterInstance, examId: string}) {
   let [paperRankInfo, setPaperRankInfo] = useState<PaperRankInfo>();
   let [answerPictureUrls, setAnswerPictureUrls] = useState<string[]>([]);
   useEffect(() => {
@@ -184,36 +184,37 @@ function PaperShowingComponent(props: {paper: Paper, changeDisplayMode: Function
           <div className="grid grid-cols-2 gap-4">
             <div>
               <div className="text-sm text-gray-500 dark:text-gray-400">班级排名/等第</div>
-              <div className="font-medium">{(paperRankInfo) ? ("true" === props.advancedMode) ? paperRankInfo.rank.class + " (打败了全班" + paperRankInfo.defeatRatio.class + "%的人)" : paperRankInfo.rankPart.class : "..."}</div>
+              <div className="font-medium">{(paperRankInfo) ? (props.advancedMode) ? paperRankInfo.rank.class + " (打败了全班" + paperRankInfo.defeatRatio.class + "%的人)" : paperRankInfo.rankPart.class : "..."}</div>
             </div>
             <div>
               <div className="text-sm text-gray-500 dark:text-gray-400">年级排名/等第</div>
-              <div className="font-medium">{(paperRankInfo) ? ("true" === props.advancedMode) ? paperRankInfo.rank.grade + " (打败了全班" + paperRankInfo.defeatRatio.grade + "%的人)" : paperRankInfo.rankPart.grade : "..."}</div>
+              <div className="font-medium">{(paperRankInfo) ? (props.advancedMode) ? paperRankInfo.rank.grade + " (打败了全班" + paperRankInfo.defeatRatio.grade + "%的人)" : paperRankInfo.rankPart.grade : "..."}</div>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <div className="text-sm text-gray-500 dark:text-gray-400">班级最高分</div>
-              <div className="font-medium">{(paperRankInfo) ? ("true" === props.advancedMode) ? paperRankInfo.highest.class : "根据要求，该数据不允许展示" : "..."}</div>
+              <div className="font-medium">{(paperRankInfo) ? (props.advancedMode) ? paperRankInfo.highest.class : "根据要求，该数据不允许展示" : "..."}</div>
             </div>
             <div>
               <div className="text-sm text-gray-500 dark:text-gray-400">年级最高分</div>
-              <div className="font-medium">{(paperRankInfo) ? ("true" === props.advancedMode) ? paperRankInfo.highest.grade : "根据要求，该数据不允许展示" : "..."}</div>
+              <div className="font-medium">{(paperRankInfo) ? (props.advancedMode) ? paperRankInfo.highest.grade : "根据要求，该数据不允许展示" : "..."}</div>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <div className="text-sm text-gray-500 dark:text-gray-400">班级平均分</div>
-              <div className="font-medium">{(paperRankInfo) ? ("true" === props.advancedMode) ? paperRankInfo.avg.class : "根据要求，该数据不允许展示" : "..."}</div>
+              <div className="font-medium">{(paperRankInfo) ? (props.advancedMode) ? paperRankInfo.avg.class : "根据要求，该数据不允许展示" : "..."}</div>
             </div>
             <div>
               <div className="text-sm text-gray-500 dark:text-gray-400">年级平均分</div>
-              <div className="font-medium">{(paperRankInfo) ? ("true" === props.advancedMode) ? paperRankInfo.avg.grade : "根据要求，该数据不允许展示" : "..."}</div>
+              <div className="font-medium">{(paperRankInfo) ? (props.advancedMode) ? paperRankInfo.avg.grade : "根据要求，该数据不允许展示" : "..."}</div>
             </div>
           </div>
           <div className="grid grid-flow-col gap-4">
             {answerPictureUrls.map((url, index) => {
-              return <Image className="rounded-lg object-cover" src={url} alt={props.paper.name + "no." + index} key={index} width={300} style={{aspectRatio: "300/200", objectFit: "cover"}} height={200} />
+              // eslint-disable-next-line @next/next/no-img-element
+              return <img className="rounded-lg object-cover" src={url} alt={props.paper.name + "_" + index} key={index} width={300} style={{aspectRatio: "300/200", objectFit: "cover"}} height={200} />
             })}
           </div>
         </CardContent>
@@ -224,7 +225,8 @@ function PaperShowingComponent(props: {paper: Paper, changeDisplayMode: Function
 export default function ExamPage({params}: { params: { id: string } }) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const advancedMode = searchParams.get("advanced")
+  // let advancedMode = searchParams.get("advanced")
+  let [advancedMode, setAdvancedMode] = useState<boolean>(false)
   let [examDetail, setExamDetail] = useState<ExamDetail>()
   let [examRankInfo, setExamRankInfo] = useState<ExamRankInfo>()
   let [displayedPapersMode, setDisplayedPapersMode] = useState<{ [index: string]: boolean }>({}) // true为显示 false为隐藏
@@ -235,6 +237,14 @@ export default function ExamPage({params}: { params: { id: string } }) {
       alert("你还没登录诶！")
       router.push("/")
       return
+    }
+    if (searchParams.get("advanced")) {
+      setAdvancedMode(("true" === searchParams.get("advanced")))
+    }else {
+      const localAdvancedMode = localStorage.getItem("advancedMode")
+      if (localAdvancedMode) {
+        setAdvancedMode(("1" === localAdvancedMode))
+      }
     }
     getExamOverviewAction(token, params.id).then((exams) => {
       if (!exams.ok) {
@@ -260,7 +270,7 @@ export default function ExamPage({params}: { params: { id: string } }) {
         // @ts-ignore
         setExamRankInfo(exams.payload)
       })
-    }, [params.id, router]);
+    }, [params.id, router, searchParams]);
 
   function changeDisplayedMode(paperId: string) {
     setDisplayedPapersMode((prevState) => {
@@ -302,36 +312,36 @@ export default function ExamPage({params}: { params: { id: string } }) {
                 <div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">班级排名/等第</div>
                   <div
-                      className="font-medium">{(examDetail) ? ("true" === advancedMode) ? examDetail.classRank + " (打败了全班" + examDetail.classDefeatRatio + "%的人)" : examDetail.classRankPart : "..."}</div>
+                      className="font-medium">{(examDetail) ? (advancedMode) ? examDetail.classRank + " (打败了全班" + examDetail.classDefeatRatio + "%的人)" : examDetail.classRankPart : "..."}</div>
                 </div>
                 <div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">年级排名/等第</div>
                   <div
-                      className="font-medium">{(examDetail) ? ("true" === advancedMode) ? examDetail.gradeRank + " (打败了全年级" + examDetail.gradeDefeatRatio + "%的人)" : examDetail.gradeRankPart : "..."}</div>
+                      className="font-medium">{(examDetail) ? (advancedMode) ? examDetail.gradeRank + " (打败了全年级" + examDetail.gradeDefeatRatio + "%的人)" : examDetail.gradeRankPart : "..."}</div>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">班级最高分</div>
                   <div
-                      className="font-medium">{(examRankInfo) ? ("true" === advancedMode) ? examRankInfo.highest.class : "根据要求，该数据不允许展示" : "..."}</div>
+                      className="font-medium">{(examRankInfo) ? (advancedMode) ? examRankInfo.highest.class : "根据要求，该数据不允许展示" : "..."}</div>
                 </div>
                 <div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">年级最高分</div>
                   <div
-                      className="font-medium">{(examRankInfo) ? ("true" === advancedMode) ? examRankInfo.highest.grade : "根据要求，该数据不允许展示" : "..."}</div>
+                      className="font-medium">{(examRankInfo) ? (advancedMode) ? examRankInfo.highest.grade : "根据要求，该数据不允许展示" : "..."}</div>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">班级平均分</div>
                   <div
-                      className="font-medium">{(examRankInfo) ? ("true" === advancedMode) ? examRankInfo.avg.class : "根据要求，该数据不允许展示" : "..."}</div>
+                      className="font-medium">{(examRankInfo) ? (advancedMode) ? examRankInfo.avg.class : "根据要求，该数据不允许展示" : "..."}</div>
                 </div>
                 <div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">年级平均分</div>
                   <div
-                      className="font-medium">{(examRankInfo) ? ("true" === advancedMode) ? examRankInfo.avg.grade : "根据要求，该数据不允许展示" : "..."}</div>
+                      className="font-medium">{(examRankInfo) ? (advancedMode) ? examRankInfo.avg.grade : "根据要求，该数据不允许展示" : "..."}</div>
                 </div>
               </div>
             </CardContent>
@@ -346,7 +356,7 @@ export default function ExamPage({params}: { params: { id: string } }) {
                   let component
                   (!displayedPapersMode[item.paperId]) ?
                    component = <PaperHiddingComponent paper={item} changeDisplayMode={changeDisplayedMode} key={item.paperId}/>
-                  : component = <PaperShowingComponent paper={item} changeDisplayMode={changeDisplayedMode} advancedMode={advancedMode as string} router={router} examId={String(examDetail?.examId)} key={item.paperId}/>
+                  : component = <PaperShowingComponent paper={item} changeDisplayMode={changeDisplayedMode} advancedMode={advancedMode} router={router} examId={String(examDetail?.examId)} key={item.paperId}/>
                   return component
                 })}
               </div>
