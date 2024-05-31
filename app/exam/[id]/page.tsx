@@ -187,7 +187,7 @@ function PaperShowingComponent(props: {paper: Paper, changeDisplayMode: Function
             </div>
             <div>
               <div className="text-sm text-gray-500 dark:text-gray-400">年级排名/等第</div>
-              <div className="font-medium">{(paperRankInfo) ? (props.advancedMode) ? paperRankInfo.rank.grade + " (打败了全班" + paperRankInfo.defeatRatio.grade + "%的人)" : paperRankInfo.rankPart.grade : "..."}</div>
+              <div className="font-medium">{(paperRankInfo) ? (props.advancedMode) ? paperRankInfo.rank.grade + " (打败了全年级" + paperRankInfo.defeatRatio.grade + "%的人)" : paperRankInfo.rankPart.grade : "..."}</div>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
