@@ -2,9 +2,11 @@
 
 import {JSX, SVGProps, useEffect, useState} from "react"
 import {formatTimestamp} from "@/utils/time"
-import {getExamsList} from "@/app/actions";
+import {getExamsList, getUserSnapshotAction} from "@/app/actions";
 import {useRouter} from "next/navigation";
 import {AppRouterInstance} from "next/dist/shared/lib/app-router-context.shared-runtime";
+import {UserSnapshot} from "@/types/exam";
+import Navbar from "@/components/navBar";
 
 // 卡片组件
 function ExamCard({ name, score, released, examId, router }: { name: string; score: number; released: string, examId: string, router: AppRouterInstance }): JSX.Element {
@@ -13,7 +15,7 @@ function ExamCard({ name, score, released, examId, router }: { name: string; sco
   }
 
     return (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer" onClick={handleClick}>
+        <div className="bg-white rounded-lg border shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer" onClick={handleClick}>
       <div className="p-4 md:p-6 flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold mb-2">{name}</h2>
@@ -32,6 +34,7 @@ function ExamCard({ name, score, released, examId, router }: { name: string; sco
 export default function ExamSelector() {
   const [examList, setExams] = useState<[]>([])
   const router = useRouter()
+  let [userSnapshot, setUserSnapshot] = useState<UserSnapshot>()
 
   useEffect(() => {
     const token = localStorage.getItem("hfs_token")
@@ -63,19 +66,31 @@ export default function ExamSelector() {
       // @ts-ignore
       setExams(newExams)
     })
+    getUserSnapshotAction(token).then((exams) => {
+      if (!exams.ok) {
+        alert("获取用户信息失败：" + exams.errMsg)
+        return
+      }
+      if (!exams.payload) {
+        alert("获取用户信息失败：" + exams.errMsg)
+        return
+      }
+      setUserSnapshot(exams.payload)
+    })
   }, [router])
 
     // @ts-ignore
   return (
-        <main className="container mx-auto px-4 py-8 md:px-6 md:py-12">
-      <h1 className="text-2xl font-bold mb-6 md:text-3xl">考试列表</h1>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {examList.map((exam: object) => (
-            // @ts-ignore
-            <ExamCard key={exam["key"]} {...exam} />
-        ))}
+      <div className="container mx-auto px-4 py-8 md:px-6 md:py-12">
+        <Navbar userName={(userSnapshot) ? userSnapshot.linkedStudent.studentName : "xxx家长"} router={router}/>
+        {/*<h1 className="text-2xl font-bold mb-6 md:text-3xl">考试列表</h1>*/}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-4 md:pt-6">
+          {examList.map((exam: object) => (
+              // @ts-ignore
+              <ExamCard key={exam["key"]} {...exam} />
+          ))}
+        </div>
       </div>
-    </main>
 )
 }
 

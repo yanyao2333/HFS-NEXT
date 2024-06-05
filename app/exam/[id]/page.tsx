@@ -5,98 +5,13 @@ import {
   getAnswerPictureAction,
   getExamOverviewAction,
   getExamRankInfoAction,
-  getPaperRankInfoAction
+  getPaperRankInfoAction, getUserSnapshotAction
 } from "@/app/actions";
 import {useRouter, useSearchParams} from "next/navigation";
 import {formatTimestamp} from "@/utils/time";
 import {AppRouterInstance} from "next/dist/shared/lib/app-router-context.shared-runtime";
-
-// 包含在试卷详情中的每科粗略信息
-interface Paper {
-  paperId: string
-  pid: string
-  name: string
-  subject: string
-  manfen: number
-  score: number
-  weakAdvantageStatus: number // 1为优 2为正常 可能3为劣
-}
-
-// 获取到的试卷详情
-interface ExamDetail {
-  examId: number
-  name: string
-  time: number
-  manfen: number // 还有一个manfenBeforeGrading，我猜是赋分后成绩，无所谓，咱们不要
-  score: number
-  classStuNum: number
-  gradeStuNum: number
-  classRank: number
-  gradeRank: number
-  classDefeatRatio: number
-  gradeDefeatRatio: number
-  papers: [Paper]
-  classRankPart: string
-  gradeRankPart: string
-}
-
-// 获取到的考试排名信息
-interface ExamRankInfo {
-  highest: {
-    class: number
-    grade: number
-  }
-  avg: {
-    class: number
-    grade: number
-  }
-  rank: {
-    class: number
-    grade: number
-  }
-  // 这个是人数
-  number: {
-    class: number
-    grade: number
-  }
-  defeatRation: {
-    class: number
-    grade: number
-  }
-  rankPart: {
-    class: string
-    grade: string
-  }
-}
-
-// 单科的排名信息
-interface PaperRankInfo {
-  highest: {
-    class: number
-    grade: number
-  }
-  avg: {
-    class: number
-    grade: number
-  }
-  rank: {
-    class: number
-    grade: number
-  }
-  // 这个是人数
-  number: {
-    class: number
-    grade: number
-  }
-  defeatRatio: {
-    class: number
-    grade: number
-  }
-  rankPart: {
-    class: string
-    grade: string
-  }
-}
+import Navbar from "@/components/navBar";
+import {ExamDetail, ExamRankInfo, Paper, PaperRankInfo, UserSnapshot} from "@/types/exam";
 
 function PaperHiddingComponent(props: {paper: Paper, changeDisplayMode: Function}) {
   return (
@@ -137,7 +52,6 @@ function PaperShowingComponent(props: {paper: Paper, changeDisplayMode: Function
         alert("获取试卷失败：" + exams.errMsg)
         return
       }
-      // @ts-ignore
       setPaperRankInfo(exams.payload)
     })
     getAnswerPictureAction(token, props.paper.paperId, props.paper.pid, props.examId).then((exams) => {
@@ -149,7 +63,6 @@ function PaperShowingComponent(props: {paper: Paper, changeDisplayMode: Function
         alert("获取试卷失败：" + exams.errMsg)
         return
       }
-      // @ts-ignore
       setAnswerPictureUrls(exams.payload["url"])
     })
   }, [props.examId, props.paper.paperId, props.paper.pid, props.router]);
@@ -229,6 +142,7 @@ export default function ExamPage({params}: { params: { id: string } }) {
   let [examDetail, setExamDetail] = useState<ExamDetail>()
   let [examRankInfo, setExamRankInfo] = useState<ExamRankInfo>()
   let [displayedPapersMode, setDisplayedPapersMode] = useState<{ [index: string]: boolean }>({}) // true为显示 false为隐藏
+  let [userSnapshot, setUserSnapshot] = useState<UserSnapshot>()
 
   useEffect(() => {
     const token = localStorage.getItem("hfs_token")
@@ -254,7 +168,6 @@ export default function ExamPage({params}: { params: { id: string } }) {
           alert("获取考试详情失败：" + exams.errMsg)
           return
         }
-        // @ts-ignore
         setExamDetail(exams.payload)
       })
       getExamRankInfoAction(token, params.id).then((exams) => {
@@ -266,8 +179,18 @@ export default function ExamPage({params}: { params: { id: string } }) {
           alert("获取考试详情失败：" + exams.errMsg)
           return
         }
-        // @ts-ignore
         setExamRankInfo(exams.payload)
+      })
+      getUserSnapshotAction(token).then((exams) => {
+        if (!exams.ok) {
+          alert("获取用户信息失败：" + exams.errMsg)
+          return
+        }
+        if (!exams.payload) {
+          alert("获取用户信息失败：" + exams.errMsg)
+          return
+        }
+        setUserSnapshot(exams.payload)
       })
     }, [params.id, router, searchParams]);
 
@@ -282,6 +205,7 @@ export default function ExamPage({params}: { params: { id: string } }) {
 
     return (
         <div className="flex flex-col gap-6 p-4 md:gap-8 md:p-6">
+          <Navbar  router={router} userName={(userSnapshot) ? userSnapshot.linkedStudent.studentName : "xxx家长"}/>
           <Card>
             <CardHeader>
               <CardTitle>{(examDetail) ? examDetail.name : params.id}</CardTitle>
