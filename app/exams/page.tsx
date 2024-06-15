@@ -92,9 +92,9 @@ export default function ExamSelector() {
         </div>
         <div className="pt-14 divide-y">
           <div></div>
-          <div className="pt-3 flex justify-between">
+          <div className="pt-3 justify-between flex flex-col md:flex-row">
     <span className="text-gray-500 text-xs flex items-center">
-      Open Source by UselessLab(Roitium) on
+      Open Source by UselessLab on
       <span className="inline-flex items-center ml-1">
         <a
             href="https://github.com/yanyao2333/HFS-NEXT"

@@ -220,7 +220,7 @@ export default function ExamPage({params}: { params: { id: string } }) {
     }
 
     return (
-        <div className="flex flex-col gap-6 md:gap-8 mx-auto px-16 py-8 md:px-16 md:py-12">
+        <div className="flex flex-col gap-6 md:gap-8 p-4 md:p-6">
             <Navbar router={router} userName={(userSnapshot) ? userSnapshot.linkedStudent.studentName : "xxx家长"}/>
             <Card>
                 <CardHeader>
@@ -309,9 +309,9 @@ export default function ExamPage({params}: { params: { id: string } }) {
             </Card>
             <div className="pt-14 divide-y">
                 <div></div>
-                <div className="pt-3 flex justify-between">
+                <div className="pt-3 flex justify-between flex-col md:flex-row">
     <span className="text-gray-500 text-xs flex items-center">
-      Open Source by UselessLab(Roitium) on
+      Open Source by UselessLab on
       <span className="inline-flex items-center ml-1">
         <a
             href="https://github.com/yanyao2333/HFS-NEXT"
