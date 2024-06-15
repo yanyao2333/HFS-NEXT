@@ -26,6 +26,10 @@ export default function Navbar(props: {userName: string, router: AppRouterInstan
         props.router.push("/")
     }
 
+    function handleSettings() {
+        props.router.push("/settings")
+    }
+
     useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
@@ -44,12 +48,17 @@ export default function Navbar(props: {userName: string, router: AppRouterInstan
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     {/*<img src="/path-to-your-avatar.png" alt="Avatar" className="h-8 w-8 rounded-full"/>*/}
                     <div className="font-black hover:text-amber-600">
-                        {props.userName}
+                        {props.userName + " (点我!)"}
                     </div>
                 </button>
                 {dropdownOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
-                        <div className="block px-4 py-2 text-gray-800 hover:bg-gray-200" onClick={handleLogout}>退出登录</div>
+                        <div className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                             onClick={handleLogout}>退出登录
+                        </div>
+                        <div className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                             onClick={handleSettings}>设置
+                        </div>
                     </div>
                 )}
             </div>
