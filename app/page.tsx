@@ -70,18 +70,20 @@ export default function Login() {
                     <CardContent className="space-y-4">
                         <div className="space-y-2">
                             <Label htmlFor="email">邮箱/用户名/手机号</Label>
-                            <Input id="email" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                            <Input id="email" required type="email" value={email}
+                                   onChange={(e) => setEmail(e.target.value)}/>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="password">密码</Label>
-                            <Input id="password" required type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                            <Input id="password" required type="password" value={password}
+                                   onChange={(e) => setPassword(e.target.value)}/>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="mode">登录方式</Label>
                             {/*// @ts-ignore*/}
                             <Select id="mode" value={mode} onValueChange={setMode}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="选择模式" />
+                                    <SelectValue placeholder="选择模式"/>
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value={loginRoleType.parent.toString()}>家长端</SelectItem>
