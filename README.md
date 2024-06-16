@@ -1,6 +1,6 @@
 <h2 align="center">✨HFS NEXT✨</h2>
 <h5 align="center">你的下一个好分数，何必是好分数？</h5>
-<h5 align="center">网址： [hfs.uselesslab.top](https://hfs.uselesslab.top)</h5>
+<h5 align="center">网址： <a href="https://hfs.uselesslab.top" target="_blank">hfs.uselesslab.top</a></h5>
 
 # 简介
 厌倦了包含着摇一摇开屏广告和各种vip提示的hfs？或许你可以试试这个~ \
