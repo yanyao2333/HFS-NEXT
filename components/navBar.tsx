@@ -48,7 +48,7 @@ export default function Navbar(props: {userName: string, router: AppRouterInstan
             <div className="relative" ref={dropdownRef}>
                 <button onClick={toggleDropdown} className="focus:outline-none flex items-center space-x-2">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={avatarB64} alt="Avatar" className="h-8 w-8 rounded-full" />
+                    <a href="/exams"><img src={avatarB64} alt="Avatar" className="h-8 w-8 rounded-full" /></a>
                     <div className="font-black hover:text-amber-600">
                         {props.userName + " (点我!)"}
                     </div>
