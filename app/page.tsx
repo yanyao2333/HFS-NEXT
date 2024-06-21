@@ -6,7 +6,7 @@ import { Input } from "@/components/input"
 import { SelectValue, SelectTrigger, SelectItem, SelectContent, Select } from "@/components/select"
 import { Button } from "@/components/button"
 import {useEffect, useState, useTransition} from "react";
-import {useRouter, useSearchParams} from "next/navigation";
+import {useRouter} from "next/navigation";
 import {loginAction, validateTokenAction} from "@/app/actions";
 
 
@@ -21,17 +21,8 @@ export default function Login() {
     const [mode, setMode] = useState(loginRoleType.parent.toString());
     const [isPending, startTransition] = useTransition()
     const router = useRouter()
-    const searchParams = useSearchParams()
 
     useEffect(() => {
-        const advancedParam = searchParams.get("advanced")
-        if (advancedParam) {
-            if ("true" === advancedParam) {
-                localStorage.setItem("advancedMode", "1")
-            }else if ("false" === advancedParam) {
-                localStorage.setItem("advancedMode", "0")
-            }
-        }
         const token = localStorage.getItem("hfs_token");
         if (token) {
             validateTokenAction(token).then((status) => {
