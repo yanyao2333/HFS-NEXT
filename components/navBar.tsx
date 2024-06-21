@@ -43,12 +43,12 @@ export default function Navbar(props: {userName: string, router: AppRouterInstan
         <nav className="p-4 flex justify-between items-center rounded-lg shadow-sm border-gray-200 border">
             <div className="text-white">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={iconB64} alt="Icon" className="h-8 w-28" />
+                <a href="/exams"><img src={iconB64} alt="Icon" className="h-8 w-28" /></a>
             </div>
             <div className="relative" ref={dropdownRef}>
                 <button onClick={toggleDropdown} className="focus:outline-none flex items-center space-x-2">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <a href="/exams"><img src={avatarB64} alt="Avatar" className="h-8 w-8 rounded-full" /></a>
+                    <img src={avatarB64} alt="Avatar" className="h-8 w-8 rounded-full" />
                     <div className="font-black hover:text-amber-600">
                         {props.userName + " (点我!)"}
                     </div>
