@@ -21,6 +21,11 @@ export default function Login() {
     const [mode, setMode] = useState(loginRoleType.parent.toString());
     const [isPending, startTransition] = useTransition()
     const router = useRouter()
+    const [loginButtonContent, setLoginButtonContent] = useState("")
+
+    useEffect(() => {
+        setLoginButtonContent(Math.random() < 0.4 ? "登录" : "Ciallo～(∠・ω< )")
+    }, []);
 
     useEffect(() => {
         const token = localStorage.getItem("hfs_token");
@@ -55,8 +60,8 @@ export default function Login() {
             <div className="flex flex-1 items-center justify-center bg-gray-100 dark:bg-gray-900">
                 <Card className="w-full max-w-md">
                     <CardHeader>
-                        <CardTitle>登录</CardTitle>
-                        <CardDescription>输入帐号密码登录好分数</CardDescription>
+                        <CardTitle>HFS NEXT</CardTitle>
+                        <CardDescription>你的下一个好分数，何必是好分数？</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="space-y-2">
@@ -82,9 +87,12 @@ export default function Login() {
                                 </SelectContent>
                             </Select>
                         </div>
+                        <text className="text-sm text-gray-500 dark:text-gray-400">
+                            忘记账号密码？<a href="https://www.haofenshu.com/findPwd/?roleType=2" target="_blank" className="underline hover:text-gray-700">点我去官网重置</a><br/><br/>没有账号密码（微信登录）请先在手机端绑定手机号并设置密码
+                        </text>
                     </CardContent>
                     <CardFooter>
-                        <Button className="w-full" onClick={handleSubmit} disabled={isPending}>登录</Button>
+                        <Button className="w-full" onClick={handleSubmit} disabled={isPending}>{loginButtonContent}</Button>
                     </CardFooter>
                 </Card>
             </div>
