@@ -1,7 +1,6 @@
 "use client"
 
 import {useState} from 'react';
-import Link from "next/link";
 
 export default function Snapshot({onClose}: { onClose: any }) {
     const [nowStage, setNowStage] = useState<number>(NaN);
@@ -60,11 +59,11 @@ export default function Snapshot({onClose}: { onClose: any }) {
                             </ul>
                             {nowStage >= (stages.length) && (
                                 <div className="flex justify-end mt-4">
-                                    <Link href="https://www.bilibili.com/video/BV1GJ411x7h7" target="_blank">
+                                    <a href="https://www.bilibili.com/video/BV1GJ411x7h7" target="_blank">
                                         <button className="px-4 py-2 rounded bg-green-600 text-white">
                                             下载文件(别点)
                                         </button>
-                                    </Link>
+                                    </a>
                                 </div>
                             )}
                         </div>
