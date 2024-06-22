@@ -21,8 +21,7 @@ export default function SwitchAdvancedMode() {
 
     return (
         <div>
-            <p className="font-bold text-xl">AdvancedMode:
-                是否显示被好分数隐藏的内容？（例如最高分、平均分、以及...不可说）</p>
+            <p className="font-bold text-xl">AdvancedMode</p>
             <p className="font-bold text-xl">当前AdvancedMode状态为：{
                 (advancedMode) ? <span style={{color: "green"}}>已开启</span> :
                     <span style={{color: "red"}}>未开启</span>}
