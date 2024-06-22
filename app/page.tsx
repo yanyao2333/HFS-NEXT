@@ -40,6 +40,7 @@ export default function Login() {
                 }
             })
         }
+        router.prefetch("/exams")
     })
 
     async function handleSubmit(): Promise<void> {

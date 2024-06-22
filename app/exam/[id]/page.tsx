@@ -140,9 +140,14 @@ function PaperShowingComponent(props: {
                 <div className="grid grid-flow-col gap-4">
                     {answerPictureUrls.map((url, index) => {
                         // eslint-disable-next-line @next/next/no-img-element
-                        return <img className="rounded-lg object-cover" src={url} alt={props.paper.name + "_" + index}
-                                    key={index} width={300} style={{aspectRatio: "300/200", objectFit: "cover"}}
-                                    height={200}/>
+                        return <a key={index} href={url} target={"_blank"}><img className="rounded-lg object-cover"
+                                                                                src={url}
+                                                                                alt={props.paper.name + "_" + index}
+                                                                                width={300} style={{
+                            aspectRatio: "300/200",
+                            objectFit: "cover"
+                        }}
+                                                                                height={200}/></a>
                     })}
                 </div>
             </CardContent>

@@ -7,23 +7,21 @@ import {useRouter} from "next/navigation";
 import {AppRouterInstance} from "next/dist/shared/lib/app-router-context.shared-runtime";
 import {UserSnapshot} from "@/types/exam";
 import Navbar from "@/components/navBar";
+import Link from "next/link";
 
 // 卡片组件
-function ExamCard({name, score, released, examId, router}: {
+function ExamCard({name, score, released, examId}: {
     name: string;
     score: number;
     released: string,
     examId: string,
     router: AppRouterInstance
 }): JSX.Element {
-    async function handleClick() {
-        router.push("/exam/" + examId)
-    }
 
     return (
-        <div
+        <Link
             className="bg-white rounded-lg border shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-            onClick={handleClick}>
+            href={"/exam/" + examId}>
             <div className="p-4 md:p-6 flex items-center justify-between">
                 <div>
                     <h2 className="text-lg font-semibold mb-2">{name}</h2>
@@ -35,7 +33,7 @@ function ExamCard({name, score, released, examId, router}: {
                 </div>
                 <ArrowRightIcon className="h-5 w-5 text-gray-500"/>
             </div>
-        </div>
+        </Link>
     )
 }
 
@@ -66,8 +64,7 @@ export default function ExamSelector() {
                     name: exam["name"],
                     score: exam["score"] + "/" + exam["manfen"],
                     released: formatTimestamp(exam["time"]),
-                    examId: exam["examId"],
-                    router: router
+                    examId: exam["examId"]
                 })
             }
             // console.log(newExams)
