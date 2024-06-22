@@ -13,6 +13,7 @@ import {formatTimestamp} from "@/utils/time";
 import {AppRouterInstance} from "next/dist/shared/lib/app-router-context.shared-runtime";
 import Navbar from "@/components/navBar";
 import {ExamDetail, ExamRankInfo, Paper, PaperRankInfo, UserSnapshot} from "@/types/exam";
+import Snapshot from "@/app/exam/[id]/snapshot";
 
 function PaperHiddingComponent(props: { paper: Paper, changeDisplayMode: Function }) {
     return (
@@ -159,11 +160,12 @@ export default function ExamPage({params}: { params: { id: string } }) {
     const router = useRouter()
     const searchParams = useSearchParams()
     // let advancedMode = searchParams.get("advanced")
-    let [advancedMode, setAdvancedMode] = useState<boolean>(false)
-    let [examDetail, setExamDetail] = useState<ExamDetail>()
-    let [examRankInfo, setExamRankInfo] = useState<ExamRankInfo>()
-    let [displayedPapersMode, setDisplayedPapersMode] = useState<{ [index: string]: boolean }>({}) // true为显示 false为隐藏
-    let [userSnapshot, setUserSnapshot] = useState<UserSnapshot>()
+    const [advancedMode, setAdvancedMode] = useState<boolean>(false)
+    const [examDetail, setExamDetail] = useState<ExamDetail>()
+    const [examRankInfo, setExamRankInfo] = useState<ExamRankInfo>()
+    const [displayedPapersMode, setDisplayedPapersMode] = useState<{ [index: string]: boolean }>({}) // true为显示 false为隐藏
+    const [userSnapshot, setUserSnapshot] = useState<UserSnapshot>()
+    const [isExamSnapshotWindowOpen, setIsExamSnapshotWindowOpen] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem("hfs_token")
@@ -229,11 +231,23 @@ export default function ExamPage({params}: { params: { id: string } }) {
             <Navbar router={router} userName={(userSnapshot) ? userSnapshot.linkedStudent.studentName : "xxx家长"}/>
             <Card>
                 <CardHeader>
-                    <CardTitle>{(examDetail) ? examDetail.name : params.id}</CardTitle>
+                    <CardTitle>
+                        {(examDetail) ? examDetail.name : params.id}
+                    </CardTitle>
+                    <div onClick={() => {
+                        setIsExamSnapshotWindowOpen(true)
+                    }} className="cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                             strokeWidth={1.5}
+                             stroke="currentColor" className="size-6">
+                            <path strokeLinecap="round" strokeLinejoin="round"
+                                  d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0-3-3m3 3 3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/>
+                        </svg>
+                    </div>
                 </CardHeader>
 
                 <CardContent className="grid gap-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-3 gap-4">
                         <div>
                             <div className="text-sm text-gray-500 dark:text-gray-400">考试名</div>
                             <div className="font-medium">{(examDetail) ? examDetail.name : "..."}</div>
@@ -290,6 +304,10 @@ export default function ExamPage({params}: { params: { id: string } }) {
                                 className="font-medium">{(examRankInfo) ? (advancedMode) ? examRankInfo.avg.grade : "根据要求，该数据不允许展示" : "..."}</div>
                         </div>
                     </div>
+                    {/* 快照弹窗 */}
+                    {(isExamSnapshotWindowOpen) && <Snapshot onClose={() => {
+                        setIsExamSnapshotWindowOpen(false)
+                    }}/>}
                 </CardContent>
             </Card>
             <Card>
