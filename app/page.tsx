@@ -1,18 +1,18 @@
 "use client"
 
-import { CardTitle, CardDescription, CardHeader, CardContent, CardFooter, Card } from "@/components/card"
-import { Label } from "@/components/label"
-import { Input } from "@/components/input"
-import { SelectValue, SelectTrigger, SelectItem, SelectContent, Select } from "@/components/select"
-import { Button } from "@/components/button"
+import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/card"
+import {Label} from "@/components/label"
+import {Input} from "@/components/input"
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/select"
+import {Button} from "@/components/button"
 import {useEffect, useState, useTransition} from "react";
 import {useRouter} from "next/navigation";
 import {loginAction, validateTokenAction} from "@/app/actions";
 
 
 enum loginRoleType {
-    parent=2,
-    student=1
+    parent = 2,
+    student = 1
 }
 
 export default function Login() {
@@ -34,7 +34,7 @@ export default function Login() {
                 if (!status.tokenExpired) {
                     console.log("你已经登录过了！")
                     router.push("/exams")
-                }else if (!status.errMsg) {
+                } else if (!status.errMsg) {
                     alert("在查询是否已登录时发生错误：" + status.errMsg)
                     return
                 }
@@ -88,11 +88,13 @@ export default function Login() {
                             </Select>
                         </div>
                         <text className="text-sm text-gray-500 dark:text-gray-400">
-                            忘记账号密码？<a href="https://www.haofenshu.com/findPwd/?roleType=2" target="_blank" className="underline hover:text-gray-700">点我去官网重置</a><br/><br/>没有账号密码（微信登录）请先在手机端绑定手机号并设置密码
+                            忘记账号密码？<a href="https://www.haofenshu.com/findPwd/?roleType=2" target="_blank"
+                                            className="underline hover:text-gray-700">点我去官网重置</a><br/><br/>没有账号密码（微信登录）请先在手机端绑定手机号并设置密码
                         </text>
                     </CardContent>
                     <CardFooter>
-                        <Button className="w-full" onClick={handleSubmit} disabled={isPending}>{loginButtonContent}</Button>
+                        <Button className="w-full" onClick={handleSubmit}
+                                disabled={isPending}>{loginButtonContent}</Button>
                     </CardFooter>
                 </Card>
             </div>

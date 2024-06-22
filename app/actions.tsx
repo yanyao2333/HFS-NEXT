@@ -2,7 +2,10 @@
 
 import {ExamDetail, ExamRankInfo, PaperRankInfo, UserSnapshot} from "@/types/exam";
 
-export async function loginAction(name: string, passwd: string, role: number): Promise<{payload: string, ok: boolean}> {
+export async function loginAction(name: string, passwd: string, role: number): Promise<{
+    payload: string,
+    ok: boolean
+}> {
     // console.log("login action", name, passwd, role)
     const res = await fetch("https://hfs-be.yunxiao.com/v2/users/sessions", {
         "headers": {
@@ -23,12 +26,12 @@ export async function loginAction(name: string, passwd: string, role: number): P
     const json_data = await res.json()
     if (json_data["code"] === 0) {
         return {payload: json_data["data"]["token"], ok: true}
-    }else {
+    } else {
         return {payload: json_data["msg"], ok: false}
     }
 }
 
-export async function validateTokenAction(token: string): Promise<{errMsg?: string, tokenExpired: boolean}> {
+export async function validateTokenAction(token: string): Promise<{ errMsg?: string, tokenExpired: boolean }> {
     const res = await fetch("https://hfs-be.yunxiao.com/v2/user-center/user-snapshot", {
         "headers": {
             "Content-Type": "application/json",
@@ -43,14 +46,14 @@ export async function validateTokenAction(token: string): Promise<{errMsg?: stri
     if (json_data["code"] === 3001) {
         console.log("登录失效")
         return {tokenExpired: true}
-    }else if (json_data["code"] === 0) {
+    } else if (json_data["code"] === 0) {
         return {tokenExpired: false}
-    }else {
+    } else {
         return {tokenExpired: false, errMsg: json_data["msg"]}
     }
 }
 
-export async function getExamsList(token: string): Promise<{examList?: [], ok: boolean, errMsg?: string}> {
+export async function getExamsList(token: string): Promise<{ examList?: [], ok: boolean, errMsg?: string }> {
     const res = await fetch("https://hfs-be.yunxiao.com/v3/exam/list?start=0&limit=10", {
         "headers": {
             "Content-Type": "application/json",
@@ -67,13 +70,17 @@ export async function getExamsList(token: string): Promise<{examList?: [], ok: b
     // console.log(json_data)
     if (json_data["code"] === 0) {
         return {examList: json_data["data"]["list"], ok: true}
-    }else {
+    } else {
         // throw Error("Login failed. Error: " + json_data["msg"]);
         return {ok: false, errMsg: json_data["msg"]}
     }
 }
 
-export async function getExamOverviewAction(token: string, examId: string): Promise<{payload?: ExamDetail, ok: boolean, errMsg?: string}> {
+export async function getExamOverviewAction(token: string, examId: string): Promise<{
+    payload?: ExamDetail,
+    ok: boolean,
+    errMsg?: string
+}> {
     const res = await fetch("https://hfs-be.yunxiao.com/v3/exam/" + examId + "/overview", {
         "headers": {
             "Content-Type": "application/json",
@@ -87,13 +94,17 @@ export async function getExamOverviewAction(token: string, examId: string): Prom
     const json_data = await res.json()
     if (json_data["code"] === 0) {
         return {payload: json_data["data"], ok: true}
-    }else {
+    } else {
         // throw Error("Login failed. Error: " + json_data["msg"]);
         return {ok: false, errMsg: json_data["msg"]}
     }
 }
 
-export async function getExamRankInfoAction(token: string, examId: string): Promise<{payload?: ExamRankInfo, ok: boolean, errMsg?: string}> {
+export async function getExamRankInfoAction(token: string, examId: string): Promise<{
+    payload?: ExamRankInfo,
+    ok: boolean,
+    errMsg?: string
+}> {
     const res = await fetch("https://hfs-be.yunxiao.com/v3/exam/" + examId + "/rank-info", {
         "headers": {
             "Content-Type": "application/json",
@@ -107,13 +118,17 @@ export async function getExamRankInfoAction(token: string, examId: string): Prom
     const json_data = await res.json()
     if (json_data["code"] === 0) {
         return {payload: json_data["data"], ok: true}
-    }else {
+    } else {
         // throw Error("Login failed. Error: " + json_data["msg"]);
         return {ok: false, errMsg: json_data["msg"]}
     }
 }
 
-export async function getAnswerPictureAction(token: string, paperId: string, pid: string, examId: string): Promise<{payload?: any, ok: boolean, errMsg?: string}> {
+export async function getAnswerPictureAction(token: string, paperId: string, pid: string, examId: string): Promise<{
+    payload?: any,
+    ok: boolean,
+    errMsg?: string
+}> {
     const res = await fetch("https://hfs-be.yunxiao.com/v3/exam/" + examId + "/papers/" + paperId + "/answer-picture?pid=" + pid, {
         "headers": {
             "Content-Type": "application/json",
@@ -127,13 +142,17 @@ export async function getAnswerPictureAction(token: string, paperId: string, pid
     const json_data = await res.json()
     if (json_data["code"] === 0) {
         return {payload: json_data["data"], ok: true}
-    }else {
+    } else {
         // throw Error("Login failed. Error: " + json_data["msg"]);
         return {ok: false, errMsg: json_data["msg"]}
     }
 }
 
-export async function getPaperRankInfoAction(token: string, examId: string, paperId: string): Promise<{payload?: PaperRankInfo, ok: boolean, errMsg?: string}> {
+export async function getPaperRankInfoAction(token: string, examId: string, paperId: string): Promise<{
+    payload?: PaperRankInfo,
+    ok: boolean,
+    errMsg?: string
+}> {
     const res = await fetch("https://hfs-be.yunxiao.com/v3/exam/" + examId + "/papers/" + paperId + "/rank-info", {
         "headers": {
             "Content-Type": "application/json",
@@ -147,13 +166,17 @@ export async function getPaperRankInfoAction(token: string, examId: string, pape
     const json_data = await res.json()
     if (json_data["code"] === 0) {
         return {payload: json_data["data"], ok: true}
-    }else {
+    } else {
         // throw Error("Login failed. Error: " + json_data["msg"]);
         return {ok: false, errMsg: json_data["msg"]}
     }
 }
 
-export async function getUserSnapshotAction(token: string): Promise<{payload?: UserSnapshot, ok: boolean, errMsg?: string}> {
+export async function getUserSnapshotAction(token: string): Promise<{
+    payload?: UserSnapshot,
+    ok: boolean,
+    errMsg?: string
+}> {
     const res = await fetch("https://hfs-be.yunxiao.com/v2/user-center/user-snapshot", {
         "headers": {
             "Content-Type": "application/json",
@@ -167,7 +190,7 @@ export async function getUserSnapshotAction(token: string): Promise<{payload?: U
     const json_data = await res.json()
     if (json_data["code"] === 0) {
         return {payload: json_data["data"], ok: true}
-    }else {
+    } else {
         // throw Error("Login failed. Error: " + json_data["msg"]);
         return {ok: false, errMsg: json_data["msg"]}
     }

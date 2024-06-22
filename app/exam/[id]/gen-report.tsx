@@ -54,7 +54,8 @@ function examScoreReport(scoreList: scoreList) {
         <div className="grid grid-rows-4 grid-cols-1 grid-flow-row" id="score-report">
             <div className="flex flex-row">
                 {genIndexRow(scoreList[0].subjectList).map((item) => {
-                    return <div className="font-medium border-1 w-20 text-center flex-shrink-0 flex-grow-0" key={item}>{item}</div>
+                    return <div className="font-medium border-1 w-20 text-center flex-shrink-0 flex-grow-0"
+                                key={item}>{item}</div>
                 })
                 }
             </div>
