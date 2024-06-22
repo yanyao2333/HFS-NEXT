@@ -20,7 +20,7 @@ export default function Snapshot({onClose}: { onClose: any }) {
 
     return (
         <div className="fixed inset-0 z-50 overflow-auto bg-gray-500 bg-opacity-75 flex justify-center items-center">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md mx-auto p-4 min-w-64 md:min-w-96">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md mx-auto p-4 min-w-64 lg:min-w-96">
                 <div className="flex justify-between items-center border-b pb-2 mb-4">
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">创建试卷快照</h2>
                     <button onClick={onClose} className="text-gray-600 dark:text-gray-400">
