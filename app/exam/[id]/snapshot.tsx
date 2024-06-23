@@ -20,7 +20,8 @@ export default function Snapshot({onClose}: { onClose: any }) {
 
     return (
         <div className="fixed inset-0 z-50 overflow-auto bg-gray-500 bg-opacity-75 flex justify-center items-center">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md mx-auto p-4 min-w-64 lg:min-w-96">
+            <div
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-lg mx-auto p-4 max-w-64 lg:min-w-96 lg:max-w-lg">
                 <div className="flex justify-between items-center border-b pb-2 mb-4">
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">创建试卷快照</h2>
                     <button onClick={onClose} className="text-gray-600 dark:text-gray-400">
@@ -38,10 +39,11 @@ export default function Snapshot({onClose}: { onClose: any }) {
                                 NEXT查看这场考试（这个功能还没开发，先画饼）</p>
                             <div className="flex justify-center gap-8">
                                 <button onClick={onClose}
-                                        className="px-4 py-2 rounded bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200">
+                                        className="px-4 py-2 rounded bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:dark:bg-gray-500 hover:bg-gray-400">
                                     我不要
                                 </button>
-                                <button onClick={handleStart} className="px-4 py-2 rounded bg-blue-600 text-white">
+                                <button onClick={handleStart}
+                                        className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">
                                     现在启动！
                                 </button>
                             </div>
