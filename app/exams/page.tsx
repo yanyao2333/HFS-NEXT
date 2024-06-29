@@ -117,7 +117,7 @@ export default function ExamSelector() {
       </span>
     </span>
                     <span className="text-gray-500 text-xs">
-      Powered by <a href="https://vercel.com" target="_blank" className="underline">Vercel</a>.
+      Powered by <a href="https://vercel.com" target="_blank" className="underline">Vercel</a>
     </span>
                 </div>
             </div>
