@@ -73,6 +73,11 @@ export default function Login() {
                         <div className="space-y-2">
                             <Label htmlFor="password">密码</Label>
                             <Input id="password" required type="password" value={password}
+                                   onKeyDown={(e) => {
+                                       if (e.key === "Enter") {
+                                           handleSubmit()
+                                       }
+                                   }}
                                    onChange={(e) => setPassword(e.target.value)}/>
                         </div>
                         <div className="space-y-2">
