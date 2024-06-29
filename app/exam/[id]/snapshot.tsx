@@ -35,8 +35,8 @@ export default function Snapshot({onClose}: { onClose: any }) {
                     {isNaN(nowStage) ? (
                         <div>
                             <p className="text-gray-700 dark:text-gray-300 mb-4"><span style={{color: "red"}}
-                                                                                       className="text-xl">(处理逻辑还没写，所以你哪怕点了启动也只能看个乐呵)用前必看！！！ </span> 坏好分数，超过120天的试卷就不能看！但无所谓，咱开发了<b>『试卷快照』</b>功能（夸我喵！），现在，你可以把考试相关的所有数据（包含分数、答题卡、错题等，api有啥全都给保存下来）<b>全部打包下载</b>，并随时上传到HFS
-                                NEXT查看这场考试（这个功能还没开发，先画饼）</p>
+                                                                                       className="text-xl">处理逻辑还没写，所以你哪怕点了启动也只能看个乐呵</span>
+                            </p>
                             <div className="flex justify-center gap-8">
                                 <button onClick={onClose}
                                         className="px-4 py-2 rounded bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:dark:bg-gray-500 hover:bg-gray-400">

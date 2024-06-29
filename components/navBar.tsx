@@ -55,7 +55,7 @@ export default function Navbar(props: { userName: string, router: AppRouterInsta
                         <div className="block px-4 py-2 text-gray-800 hover:bg-gray-200" onClick={() => {
                             alert("查完成绩心情不好？我的建议是去玩一玩千恋万花，没别的意思，只是想让你看看芳乃有多可爱，白毛巫女赛高！")
                         }}>
-                            tips: 这头像是我夹带的私货，芳乃可爱捏~
+                            tips: 这头像不是你的，只是想让你看看芳乃
                         </div>
                         <Link className="block px-4 py-2 text-gray-800 hover:bg-gray-200" href={"/settings"}>设置
                         </Link>

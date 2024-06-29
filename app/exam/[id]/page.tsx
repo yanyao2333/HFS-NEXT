@@ -234,22 +234,22 @@ export default function ExamPage({params}: { params: { id: string } }) {
                     <CardTitle>
                         {(examDetail) ? examDetail.name : params.id}
                     </CardTitle>
+                    <div className="flex flex-row pt-3 gap-3">
                     <div onClick={() => {
                         setIsExamSnapshotWindowOpen(true)
-                    }} className="cursor-pointer flex-grow-0">
-                        <div className="border border-gray-400 rounded-full p-1 hover:bg-gray-200">
+                    }} className="cursor-pointer flex-grow-0 border border-gray-400 rounded-full p-1 hover:bg-gray-200">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                  strokeWidth={1.5}
                                  stroke="currentColor" className="size-5">
                                 <path strokeLinecap="round" strokeLinejoin="round"
                                       d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0-3-3m3 3 3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/>
                             </svg>
-                        </div>
+                    </div>
                     </div>
                 </CardHeader>
 
                 <CardContent className="grid gap-4">
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 gap-4">
                         <div>
                             <div className="text-sm text-gray-500 dark:text-gray-400">考试名</div>
                             <div className="font-medium">{(examDetail) ? examDetail.name : "..."}</div>
