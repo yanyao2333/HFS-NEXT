@@ -347,14 +347,14 @@ export default function ExamPage({params}: { params: { id: string } }) {
         <a
             href="https://github.com/yanyao2333/HFS-NEXT"
             target="_blank"
-            className="ml-1"
+            className="ml-1 underline"
         >
           yanyao2333/HFS-NEXT
         </a>
       </span>
     </span>
                     <span className="text-gray-500 text-xs">
-      Powered by <a href="https://vercel.com" target="_blank">Vercel</a>.
+      Powered by <a href="https://vercel.com" target="_blank" className="underline">Vercel</a>
     </span>
                 </div>
             </div>
