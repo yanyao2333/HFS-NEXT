@@ -20,7 +20,7 @@ export default function SwitchAdvancedMode() {
     }
 
     return (
-        <div>
+        <div className="dark:bg-gray-900 bg-white">
             <p className="font-bold text-xl">AdvancedMode</p>
             <p className="font-bold text-xl">当前AdvancedMode状态为：{
                 (advancedMode) ? <span style={{color: "green"}}>已开启</span> :

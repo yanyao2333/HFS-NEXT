@@ -58,7 +58,7 @@ export default function Login() {
     // @ts-ignore
     return (
         <div className="flex min-h-screen flex-col">
-            <div className="flex flex-1 items-center justify-center bg-gray-100 dark:bg-gray-900">
+            <div className="flex flex-1 items-center justify-center bg-white dark:bg-gray-900">
                 <Card className="w-full max-w-md">
                     <CardHeader>
                         <CardTitle>HFS NEXT</CardTitle>

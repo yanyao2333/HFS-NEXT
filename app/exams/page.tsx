@@ -20,7 +20,7 @@ function ExamCard({name, score, released, examId}: {
 
     return (
         <Link
-            className="bg-white rounded-lg border shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+            className="bg-white rounded-lg border shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer dark:bg-gray-900"
             href={"/exam/" + examId}>
             <div className="p-4 md:p-6 flex items-center justify-between">
                 <div>

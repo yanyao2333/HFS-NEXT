@@ -227,7 +227,7 @@ export default function ExamPage({params}: { params: { id: string } }) {
     }
 
     return (
-        <div className="flex flex-col px-4 py-8 mx-auto md:px-6 md:py-12 select-none">
+        <div className="flex flex-col px-4 py-8 mx-auto md:px-6 md:py-12 select-none bg-white dark:bg-gray-900">
             <Navbar router={router} userName={(userSnapshot) ? userSnapshot.linkedStudent.studentName : "xxx家长"}/>
             <div className="flex flex-col gap-6 pt-6">
                 <Card>
