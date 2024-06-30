@@ -86,39 +86,39 @@ export default function ExamSelector() {
 
     // @ts-ignore
     return (
-        <div className="container mx-auto px-4 py-8 md:px-6 md:py-12">
+        <div className="flex flex-col mx-auto px-4 py-8 md:px-6 md:py-12">
             <Navbar userName={(userSnapshot) ? userSnapshot.linkedStudent.studentName : "xxx家长"} router={router}/>
             {/*<h1 className="text-2xl font-bold mb-6 md:text-3xl">考试列表</h1>*/}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-4 md:pt-6">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-6 md:pt-6">
                 {examList.map((exam: object) => (
                     // @ts-ignore
                     <ExamCard key={exam["key"]} {...exam} />
                 ))}
             </div>
-            <div className="pt-14 divide-y">
+            <div className="pt-10 divide-y">
                 <div></div>
-                <div className="pt-3 justify-between flex flex-col md:flex-row">
-    <span className="text-gray-500 text-xs flex items-center">
-      Open Source by UselessLab on
-      <span className="inline-flex items-center ml-1">
-        <a
-            href="https://github.com/yanyao2333/HFS-NEXT"
-            target="_blank"
-            className="ml-1">
-          <GithubSVGIcon/>
-      </a>
-        <a
-            href="https://github.com/yanyao2333/HFS-NEXT"
-            target="_blank"
-            className="ml-1 underline"
-        >
-          yanyao2333/HFS-NEXT
-        </a>
-      </span>
-    </span>
+                <div className="pt-2 justify-between flex flex-col md:flex-row">
+                    <span className="text-gray-500 text-xs flex items-center">
+                      Open Source by UselessLab on
+                      <span className="inline-flex items-center ml-1">
+                        <a
+                            href="https://github.com/yanyao2333/HFS-NEXT"
+                            target="_blank"
+                            className="ml-1">
+                          <GithubSVGIcon/>
+                      </a>
+                        <a
+                            href="https://github.com/yanyao2333/HFS-NEXT"
+                            target="_blank"
+                            className="ml-1 underline"
+                        >
+                          yanyao2333/HFS-NEXT
+                        </a>
+                      </span>
+                    </span>
                     <span className="text-gray-500 text-xs">
-      Powered by <a href="https://vercel.com" target="_blank" className="underline">Vercel</a>
-    </span>
+                      Powered by <a href="https://vercel.com" target="_blank" className="underline">Vercel</a>
+                    </span>
                 </div>
             </div>
         </div>

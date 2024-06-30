@@ -20,7 +20,7 @@ function PaperHiddingComponent(props: { paper: Paper, changeDisplayMode: Functio
         <Card>
             <CardHeader onClick={() => {
                 props.changeDisplayMode(props.paper.paperId)
-            }} className="select-none">
+            }} className="select-none cursor-pointer">
                 <div className="flex w-full items-center justify-between">
                     <div>{props.paper.name}</div>
                     <div className="flex items-center gap-2">
@@ -79,7 +79,7 @@ function PaperShowingComponent(props: {
         <Card>
             <CardHeader onClick={() => {
                 props.changeDisplayMode(props.paper.paperId)
-            }} className="select-none">
+            }} className="select-none cursor-pointer">
                 <div className="flex w-full items-center justify-between">
                     <div>{props.paper.name}</div>
                     <div className="flex items-center gap-2">
@@ -91,7 +91,7 @@ function PaperShowingComponent(props: {
                     </div>
                 </div>
             </CardHeader>
-            <CardContent className="grid gap-4 px-4 pb-4">
+            <CardContent className="grid gap-4 px-4 pb-4 select-none">
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <div className="text-sm text-gray-500 dark:text-gray-400">满分</div>
@@ -227,114 +227,118 @@ export default function ExamPage({params}: { params: { id: string } }) {
     }
 
     return (
-        <div className="flex flex-col gap-6 md:gap-8 p-4 md:p-6">
+        <div className="flex flex-col px-4 py-8 mx-auto md:px-6 md:py-12 select-none">
             <Navbar router={router} userName={(userSnapshot) ? userSnapshot.linkedStudent.studentName : "xxx家长"}/>
-            <Card>
-                <CardHeader>
-                    <CardTitle>
-                        {(examDetail) ? examDetail.name : params.id}
-                    </CardTitle>
-                    <div className="flex flex-row pt-3 gap-3">
-                    <div onClick={() => {
-                        setIsExamSnapshotWindowOpen(true)
-                    }} className="cursor-pointer flex-grow-0 border border-gray-400 rounded-full p-1 hover:bg-gray-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                 strokeWidth={1.5}
-                                 stroke="currentColor" className="size-5">
-                                <path strokeLinecap="round" strokeLinejoin="round"
-                                      d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0-3-3m3 3 3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/>
-                            </svg>
-                    </div>
-                    </div>
-                </CardHeader>
+            <div className="flex flex-col gap-6 pt-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>
+                            {(examDetail) ? examDetail.name : params.id}
+                        </CardTitle>
+                        <div className="flex flex-row pt-3 gap-3">
+                            <div onClick={() => {
+                                setIsExamSnapshotWindowOpen(true)
+                            }}
+                                 className="cursor-pointer flex-grow-0 border border-gray-400 rounded-full p-1 hover:bg-gray-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                     strokeWidth={1.5}
+                                     stroke="currentColor" className="size-5">
+                                    <path strokeLinecap="round" strokeLinejoin="round"
+                                          d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0-3-3m3 3 3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </CardHeader>
 
-                <CardContent className="grid gap-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">考试名</div>
-                            <div className="font-medium">{(examDetail) ? examDetail.name : "..."}</div>
+                    <CardContent className="grid gap-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">考试名</div>
+                                <div className="font-medium">{(examDetail) ? examDetail.name : "..."}</div>
+                            </div>
+                            <div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">考试发布时间</div>
+                                <div
+                                    className="font-medium">{(examDetail) ? formatTimestamp(examDetail.time as number) : "..."}</div>
+                            </div>
                         </div>
-                        <div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">考试发布时间</div>
-                            <div
-                                className="font-medium">{(examDetail) ? formatTimestamp(examDetail.time as number) : "..."}</div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">满分</div>
+                                <div className="font-medium">{(examDetail) ? examDetail.manfen : "..."}</div>
+                            </div>
+                            <div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">得分</div>
+                                <div className="font-medium">{(examDetail) ? examDetail.score : "..."}</div>
+                            </div>
                         </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">满分</div>
-                            <div className="font-medium">{(examDetail) ? examDetail.manfen : "..."}</div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">班级排名/等第</div>
+                                <div
+                                    className="font-medium">{(examDetail) ? (advancedMode) ? examDetail.classRank + " (打败了全班" + examDetail.classDefeatRatio + "%的人)" : examDetail.classRankPart : "..."}</div>
+                            </div>
+                            <div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">年级排名/等第</div>
+                                <div
+                                    className="font-medium">{(examDetail) ? (advancedMode) ? examDetail.gradeRank + " (打败了全年级" + examDetail.gradeDefeatRatio + "%的人)" : examDetail.gradeRankPart : "..."}</div>
+                            </div>
                         </div>
-                        <div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">得分</div>
-                            <div className="font-medium">{(examDetail) ? examDetail.score : "..."}</div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">班级最高分</div>
+                                <div
+                                    className="font-medium">{(examRankInfo) ? (advancedMode) ? examRankInfo.highest.class : "根据要求，该数据不允许展示" : "..."}</div>
+                            </div>
+                            <div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">年级最高分</div>
+                                <div
+                                    className="font-medium">{(examRankInfo) ? (advancedMode) ? examRankInfo.highest.grade : "根据要求，该数据不允许展示" : "..."}</div>
+                            </div>
                         </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">班级排名/等第</div>
-                            <div
-                                className="font-medium">{(examDetail) ? (advancedMode) ? examDetail.classRank + " (打败了全班" + examDetail.classDefeatRatio + "%的人)" : examDetail.classRankPart : "..."}</div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">班级平均分</div>
+                                <div
+                                    className="font-medium">{(examRankInfo) ? (advancedMode) ? examRankInfo.avg.class : "根据要求，该数据不允许展示" : "..."}</div>
+                            </div>
+                            <div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">年级平均分</div>
+                                <div
+                                    className="font-medium">{(examRankInfo) ? (advancedMode) ? examRankInfo.avg.grade : "根据要求，该数据不允许展示" : "..."}</div>
+                            </div>
                         </div>
-                        <div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">年级排名/等第</div>
-                            <div
-                                className="font-medium">{(examDetail) ? (advancedMode) ? examDetail.gradeRank + " (打败了全年级" + examDetail.gradeDefeatRatio + "%的人)" : examDetail.gradeRankPart : "..."}</div>
+                        {/* 快照弹窗 */}
+                        {(isExamSnapshotWindowOpen) && <Snapshot onClose={() => {
+                            setIsExamSnapshotWindowOpen(false)
+                        }}/>}
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>各科分析</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid gap-4">
+                            {examDetail?.papers.map((item) => {
+                                let component
+                                (!displayedPapersMode[item.paperId]) ?
+                                    component =
+                                        <PaperHiddingComponent paper={item} changeDisplayMode={changeDisplayedMode}
+                                                               key={item.paperId}/>
+                                    : component =
+                                        <PaperShowingComponent paper={item} changeDisplayMode={changeDisplayedMode}
+                                                               advancedMode={advancedMode} router={router}
+                                                               examId={String(examDetail?.examId)} key={item.paperId}/>
+                                return component
+                            })}
                         </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">班级最高分</div>
-                            <div
-                                className="font-medium">{(examRankInfo) ? (advancedMode) ? examRankInfo.highest.class : "根据要求，该数据不允许展示" : "..."}</div>
-                        </div>
-                        <div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">年级最高分</div>
-                            <div
-                                className="font-medium">{(examRankInfo) ? (advancedMode) ? examRankInfo.highest.grade : "根据要求，该数据不允许展示" : "..."}</div>
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">班级平均分</div>
-                            <div
-                                className="font-medium">{(examRankInfo) ? (advancedMode) ? examRankInfo.avg.class : "根据要求，该数据不允许展示" : "..."}</div>
-                        </div>
-                        <div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">年级平均分</div>
-                            <div
-                                className="font-medium">{(examRankInfo) ? (advancedMode) ? examRankInfo.avg.grade : "根据要求，该数据不允许展示" : "..."}</div>
-                        </div>
-                    </div>
-                    {/* 快照弹窗 */}
-                    {(isExamSnapshotWindowOpen) && <Snapshot onClose={() => {
-                        setIsExamSnapshotWindowOpen(false)
-                    }}/>}
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle>各科分析</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="grid gap-4">
-                        {examDetail?.papers.map((item) => {
-                            let component
-                            (!displayedPapersMode[item.paperId]) ?
-                                component = <PaperHiddingComponent paper={item} changeDisplayMode={changeDisplayedMode}
-                                                                   key={item.paperId}/>
-                                : component =
-                                    <PaperShowingComponent paper={item} changeDisplayMode={changeDisplayedMode}
-                                                           advancedMode={advancedMode} router={router}
-                                                           examId={String(examDetail?.examId)} key={item.paperId}/>
-                            return component
-                        })}
-                    </div>
-                </CardContent>
-            </Card>
-            <div className="pt-14 divide-y">
+                    </CardContent>
+                </Card>
+            </div>
+            <div className="pt-10 divide-y">
                 <div></div>
-                <div className="pt-3 flex justify-between flex-col md:flex-row">
+                <div className="pt-2 flex justify-between flex-col md:flex-row">
     <span className="text-gray-500 text-xs flex items-center">
       Open Source by UselessLab on
       <span className="inline-flex items-center ml-1">
