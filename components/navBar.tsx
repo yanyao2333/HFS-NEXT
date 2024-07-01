@@ -46,7 +46,8 @@ export default function Navbar(props: { userName: string, router: AppRouterInsta
                 <button onClick={toggleDropdown} className="focus:outline-none flex items-center space-x-2">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={avatarB64} alt="Avatar" className="h-8 w-8 rounded-full"/>
-                    <div className="font-black hover:text-amber-600">
+                    <div
+                        className="font-black text-gray-700 dark:text-gray-200 hover:dark:text-white hover:text-gray-900">
                         {props.userName + " (点我!)"}
                     </div>
                 </button>
@@ -55,7 +56,7 @@ export default function Navbar(props: { userName: string, router: AppRouterInsta
                         <div className="block px-4 py-2 text-gray-800 hover:bg-gray-200" onClick={() => {
                             alert("查完成绩心情不好？我的建议是去玩一玩千恋万花，没别的意思，只是想让你看看芳乃有多可爱，白毛巫女赛高！")
                         }}>
-                            tips: 这头像不是你的，只是想让你看看芳乃
+                            tips: 这头像不是你的，只是想让你看看芳乃多可爱
                         </div>
                         <Link className="block px-4 py-2 text-gray-800 hover:bg-gray-200" href={"/settings"}>设置
                         </Link>
