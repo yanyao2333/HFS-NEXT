@@ -11,11 +11,11 @@ export default function Snapshot({onClose}: { onClose: any }) {
     ]
 
     const handleStart = async () => {
-        for (let index = 0; index < stages.length; index++) {
-            setNowStage(index);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-        setNowStage(stages.length);
+        // for (let index = 0; index < stages.length; index++) {
+        //     setNowStage(index);
+        //     await new Promise(resolve => setTimeout(resolve, 1000));
+        // }
+        // setNowStage(stages.length);
     };
 
     return (
@@ -35,7 +35,7 @@ export default function Snapshot({onClose}: { onClose: any }) {
                     {isNaN(nowStage) ? (
                         <div>
                             <p className="text-gray-700 dark:text-gray-300 mb-4"><span style={{color: "red"}}
-                                                                                       className="text-xl">处理逻辑还没写，所以你哪怕点了启动也只能看个乐呵</span>
+                                                                                       className="text-xl">开发中</span>
                             </p>
                             <div className="flex justify-center gap-8">
                                 <button onClick={onClose}
@@ -44,7 +44,7 @@ export default function Snapshot({onClose}: { onClose: any }) {
                                 </button>
                                 <button onClick={handleStart}
                                         className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">
-                                    现在启动！
+                                    点左边的
                                 </button>
                             </div>
                         </div>
