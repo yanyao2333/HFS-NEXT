@@ -14,6 +14,8 @@ import {AppRouterInstance} from "next/dist/shared/lib/app-router-context.shared-
 import Navbar from "@/components/navBar";
 import {ExamDetail, ExamRankInfo, Paper, PaperRankInfo, UserSnapshot} from "@/types/exam";
 import Snapshot from "@/app/exam/[id]/snapshot";
+import {Radar} from "react-chartjs-2";
+import {Chart as ChartJS, Filler, Legend, LineElement, PointElement, RadialLinearScale, Tooltip,} from 'chart.js';
 
 function PaperHiddingComponent(props: { paper: Paper, changeDisplayMode: Function }) {
     return (
@@ -157,6 +159,14 @@ function PaperShowingComponent(props: {
 }
 
 export default function ExamPage({params}: { params: { id: string } }) {
+    ChartJS.register(
+        RadialLinearScale,
+        PointElement,
+        LineElement,
+        Filler,
+        Tooltip,
+        Legend
+    );
     const router = useRouter()
     const searchParams = useSearchParams()
     // let advancedMode = searchParams.get("advanced")
@@ -167,6 +177,7 @@ export default function ExamPage({params}: { params: { id: string } }) {
     const [userSnapshot, setUserSnapshot] = useState<UserSnapshot>()
     const [isExamSnapshotWindowOpen, setIsExamSnapshotWindowOpen] = useState(false);
     const [isShareWindowOpen, setIsShareWindowOpen] = useState(false)
+    const [radarChartData, setRadarChartData] = useState<any>()
 
     useEffect(() => {
         const token = localStorage.getItem("hfs_token")
@@ -192,6 +203,33 @@ export default function ExamPage({params}: { params: { id: string } }) {
                 alert("获取考试详情失败：" + exams.errMsg)
                 return
             }
+            setRadarChartData({
+                labels: exams.payload.papers.map(item => item.name),
+                datasets: [
+                    {
+                        label: "你的得分",
+                        data: exams.payload.papers.map(item => item.score),
+                        fill: true,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        pointBackgroundColor: 'rgb(255, 99, 132)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(255, 99, 132)'
+                    },
+                    {
+                        label: "满分",
+                        data: exams.payload.papers.map(item => item.manfen),
+                        fill: true,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgb(54, 162, 235)',
+                        pointBackgroundColor: 'rgb(54, 162, 235)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(54, 162, 235)'
+                    }
+                ]
+            })
             setExamDetail(exams.payload)
         })
         getExamRankInfoAction(token, params.id).then((exams) => {
@@ -227,9 +265,9 @@ export default function ExamPage({params}: { params: { id: string } }) {
         })
     }
 
-    // @ts-ignore
     return (
-        <div className="flex flex-col px-4 py-8 mx-auto md:px-6 md:py-12 select-none bg-white dark:bg-gray-900">
+        <div
+            className="flex flex-col mx-auto px-4 pt-6 pb-2 md:px-4 md:pt-6 md:pb-2 bg-white dark:bg-gray-900 min-h-screen select-none">
             <Navbar router={router} userName={(userSnapshot) ? userSnapshot.linkedStudent.studentName : "xxx家长"}/>
             <div className="flex flex-col gap-6 pt-6">
                 <Card>
@@ -320,6 +358,9 @@ export default function ExamPage({params}: { params: { id: string } }) {
                                     className="font-medium">{(examRankInfo) ? (advancedMode) ? examRankInfo.avg.grade : "根据要求，该数据不允许展示" : "..."}</div>
                             </div>
                         </div>
+                        <div className="h-80 w-80 justify-self-center">
+                            {(radarChartData) ? <Radar data={radarChartData} datasetIdKey="radar"/> : <div/>}
+                        </div>
                         {/* 快照弹窗 */}
                         {(isExamSnapshotWindowOpen) && <Snapshot onClose={() => {
                             setIsExamSnapshotWindowOpen(false)
@@ -351,27 +392,27 @@ export default function ExamPage({params}: { params: { id: string } }) {
             <div className="pt-10 divide-y">
                 <div></div>
                 <div className="pt-2 flex justify-between flex-col md:flex-row">
-    <span className="text-gray-500 text-xs flex items-center">
-      Open Source by UselessLab on
-      <span className="inline-flex items-center ml-1">
-        <a
-            href="https://github.com/yanyao2333/HFS-NEXT"
-            target="_blank"
-            className="ml-1">
-          <GithubSVGIcon/>
-      </a>
-        <a
-            href="https://github.com/yanyao2333/HFS-NEXT"
-            target="_blank"
-            className="ml-1 underline"
-        >
-          yanyao2333/HFS-NEXT
-        </a>
-      </span>
-    </span>
-                    <span className="text-gray-500 text-xs">
-      Powered by <a href="https://vercel.com" target="_blank" className="underline">Vercel</a>
-    </span>
+                    <span className="text-gray-500 text-xs flex items-center">
+                      Open Source by UselessLab on
+                      <span className="inline-flex items-center ml-1">
+                        <a
+                            href="https://github.com/yanyao2333/HFS-NEXT"
+                            target="_blank"
+                            className="ml-1">
+                          <GithubSVGIcon/>
+                      </a>
+                        <a
+                            href="https://github.com/yanyao2333/HFS-NEXT"
+                            target="_blank"
+                            className="ml-1 underline"
+                        >
+                          yanyao2333/HFS-NEXT
+                        </a>
+                      </span>
+                    </span>
+                    <span className="text-gray-500 text-xs content-center">
+                      Powered by <a href="https://vercel.com" target="_blank" className="underline">Vercel</a>
+                    </span>
                 </div>
             </div>
         </div>
