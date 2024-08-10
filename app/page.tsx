@@ -52,6 +52,7 @@ export default function Login() {
                 toast.error("登录失败，原因：" + _token.payload)
                 return
             }
+            toast.success("登录成功 进入新世界")
             localStorage.setItem("hfs_token", _token.payload)
             router.push("/exams")
         })
