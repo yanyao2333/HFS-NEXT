@@ -1,6 +1,6 @@
 "use client"
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/card"
-import {useEffect, useState} from "react"
+import {useEffect, useRef, useState} from "react"
 import {
     getAnswerPictureAction,
     getExamOverviewAction,
@@ -16,6 +16,8 @@ import {ExamDetail, ExamRankInfo, Paper, PaperRankInfo, UserSnapshot} from "@/ty
 import Snapshot from "@/app/exam/[id]/snapshot";
 import {Radar} from "react-chartjs-2";
 import {Chart as ChartJS, Filler, Legend, LineElement, PointElement, RadialLinearScale, Tooltip,} from 'chart.js';
+import toast from "react-hot-toast";
+import html2canvas from "html2canvas";
 
 function PaperHiddingComponent(props: { paper: Paper, changeDisplayMode: Function }) {
     return (
@@ -49,28 +51,28 @@ function PaperShowingComponent(props: {
     useEffect(() => {
         const token = localStorage.getItem("hfs_token")
         if (!token) {
-            alert("你还没登录诶！")
+            toast.error("你还没登录诶！")
             props.router.push("/")
             return
         }
         getPaperRankInfoAction(token, props.examId, props.paper.paperId).then((exams) => {
             if (!exams.ok) {
-                alert("获取试卷失败：" + exams.errMsg)
+                toast.error("获取试卷失败：" + exams.errMsg)
                 return
             }
             if (!exams.payload) {
-                alert("获取试卷失败：" + exams.errMsg)
+                toast.error("获取试卷失败：" + exams.errMsg)
                 return
             }
             setPaperRankInfo(exams.payload)
         })
         getAnswerPictureAction(token, props.paper.paperId, props.paper.pid, props.examId).then((exams) => {
             if (!exams.ok) {
-                alert("获取试卷失败：" + exams.errMsg)
+                toast.error("获取试卷失败：" + exams.errMsg)
                 return
             }
             if (!exams.payload) {
-                alert("获取试卷失败：" + exams.errMsg)
+                toast.error("获取试卷失败：" + exams.errMsg)
                 return
             }
             setAnswerPictureUrls(exams.payload["url"])
@@ -176,13 +178,15 @@ export default function ExamPage({params}: { params: { id: string } }) {
     const [displayedPapersMode, setDisplayedPapersMode] = useState<{ [index: string]: boolean }>({}) // true为显示 false为隐藏
     const [userSnapshot, setUserSnapshot] = useState<UserSnapshot>()
     const [isExamSnapshotWindowOpen, setIsExamSnapshotWindowOpen] = useState(false);
-    const [isShareWindowOpen, setIsShareWindowOpen] = useState(false)
     const [radarChartData, setRadarChartData] = useState<any>()
+    const pageRef = useRef(null)
+    const [screenshot, setScreenshot] = useState("")
+    const [showScreenshotModal, setShowScreenshotModal] = useState(false)
 
     useEffect(() => {
         const token = localStorage.getItem("hfs_token")
         if (!token) {
-            alert("你还没登录诶！")
+            toast.error("你还没登录诶！")
             router.push("/")
             return
         }
@@ -196,11 +200,11 @@ export default function ExamPage({params}: { params: { id: string } }) {
         }
         getExamOverviewAction(token, params.id).then((exams) => {
             if (!exams.ok) {
-                alert("获取考试详情失败：" + exams.errMsg)
+                toast.error("获取考试详情失败：" + exams.errMsg)
                 return
             }
             if (!exams.payload) {
-                alert("获取考试详情失败：" + exams.errMsg)
+                toast.error("获取考试详情失败：" + exams.errMsg)
                 return
             }
             setRadarChartData({
@@ -234,22 +238,22 @@ export default function ExamPage({params}: { params: { id: string } }) {
         })
         getExamRankInfoAction(token, params.id).then((exams) => {
             if (!exams.ok) {
-                alert("获取考试详情失败：" + exams.errMsg)
+                toast.error("获取考试详情失败：" + exams.errMsg)
                 return
             }
             if (!exams.payload) {
-                alert("获取考试详情失败：" + exams.errMsg)
+                toast.error("获取考试详情失败：" + exams.errMsg)
                 return
             }
             setExamRankInfo(exams.payload)
         })
         getUserSnapshotAction(token).then((exams) => {
             if (!exams.ok) {
-                alert("获取用户信息失败：" + exams.errMsg)
+                toast.error("获取用户信息失败：" + exams.errMsg)
                 return
             }
             if (!exams.payload) {
-                alert("获取用户信息失败：" + exams.errMsg)
+                toast.error("获取用户信息失败：" + exams.errMsg)
                 return
             }
             setUserSnapshot(exams.payload)
@@ -265,9 +269,17 @@ export default function ExamPage({params}: { params: { id: string } }) {
         })
     }
 
+    const handleDownloadScreenshot = () => {
+        const link = document.createElement('a');
+        link.href = screenshot;
+        link.download = 'screenshot.png';
+        link.click();
+    };
+
     return (
         <div
-            className="flex flex-col mx-auto px-4 pt-6 pb-2 md:px-4 md:pt-6 md:pb-2 bg-white dark:bg-gray-900 min-h-screen select-none">
+            className="flex flex-col mx-auto px-4 pt-6 pb-2 md:px-4 md:pt-6 md:pb-2 bg-white dark:bg-gray-900 min-h-screen select-none"
+            ref={pageRef}>
             <Navbar router={router} userName={(userSnapshot) ? userSnapshot.linkedStudent.studentName : "xxx家长"}/>
             <div className="flex flex-col gap-6 pt-6">
                 <Card>
@@ -288,7 +300,17 @@ export default function ExamPage({params}: { params: { id: string } }) {
                                 </svg>
                             </div>
                             <div onClick={() => {
-                                setIsShareWindowOpen(true)
+                                if (pageRef.current) {
+                                    html2canvas(pageRef.current, {
+                                        useCORS: true,
+                                        foreignObjectRendering: true
+                                    }).then((canvas) => {
+                                        const dataURL = canvas.toDataURL("image/png")
+                                        setScreenshot(dataURL)
+                                        setShowScreenshotModal(true)
+                                        toast.success("生成分享截图成功")
+                                    })
+                                }
                             }}
                                  className="cursor-pointer flex-grow-0 border border-gray-400 rounded-full p-1 hover:bg-gray-200">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -298,6 +320,26 @@ export default function ExamPage({params}: { params: { id: string } }) {
                                 </svg>
                             </div>
                         </div>
+
+                        {showScreenshotModal && (
+                            <div
+                                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 ">
+                                <div className="relative bg-white p-6 rounded-lg text-center shadow-lg">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={screenshot} alt="Screenshot" className="max-w-full max-h-[80vh] mb-4"/>
+                                    <button onClick={handleDownloadScreenshot}
+                                            className="bg-blue-500 text-white px-4 py-2 rounded shadow-lg hover:bg-blue-600 transition">
+                                        下载截图
+                                    </button>
+                                    <button onClick={() => {
+                                        setShowScreenshotModal(false)
+                                    }}
+                                            className="absolute top-2 right-2 text-2xl text-gray-500 hover:text-gray-700 transition">
+                                        ×
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </CardHeader>
 
                     <CardContent className="grid gap-4">

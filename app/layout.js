@@ -1,6 +1,7 @@
 import "./globals.css";
 import {Analytics} from "@vercel/analytics/next";
 import {SpeedInsights} from "@vercel/speed-insights/next";
+import {Toaster} from "react-hot-toast";
 
 export default function RootLayout({children}) {
     return (
@@ -18,6 +19,7 @@ export default function RootLayout({children}) {
         {children}
         <Analytics/>
         <SpeedInsights/>
+        <Toaster/>
         </body>
         </html>
     )

@@ -8,6 +8,7 @@ import {Button} from "@/components/button"
 import {useEffect, useState, useTransition} from "react";
 import {useRouter} from "next/navigation";
 import {loginAction, validateTokenAction} from "@/app/actions";
+import toast from "react-hot-toast";
 
 
 enum loginRoleType {
@@ -25,29 +26,30 @@ export default function Login() {
 
     useEffect(() => {
         setLoginButtonContent(Math.random() < 0.4 ? "登录" : "Ciallo～(∠・ω< )")
-    }, []);
-
-    useEffect(() => {
         const token = localStorage.getItem("hfs_token");
         if (token) {
             validateTokenAction(token).then((status) => {
                 if (!status.tokenExpired) {
-                    console.log("你已经登录过了！")
+                    toast("你已经登录过了", {icon: "❕"})
                     router.push("/exams")
-                } else if (!status.errMsg) {
-                    alert("在查询是否已登录时发生错误：" + status.errMsg)
+                } else if (status.errMsg) {
+                    toast.error("在查询是否已登录时发生错误：" + status.errMsg)
                     return
                 }
             })
         }
         router.prefetch("/exams")
-    })
+    }, [router])
 
     async function handleSubmit(): Promise<void> {
         startTransition(async () => {
+            if (!email || !password) {
+                toast.error("你还没写账号/密码呢！！！")
+                return
+            }
             const _token = await loginAction(email, password, Number(mode))
             if (!_token.ok) {
-                alert("登录失败，原因：" + _token.payload)
+                toast.error("登录失败，原因：" + _token.payload)
                 return
             }
             localStorage.setItem("hfs_token", _token.payload)

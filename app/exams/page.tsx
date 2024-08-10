@@ -8,6 +8,7 @@ import {AppRouterInstance} from "next/dist/shared/lib/app-router-context.shared-
 import {UserSnapshot} from "@/types/exam";
 import Navbar from "@/components/navBar";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 // 卡片组件
 function ExamCard({name, score, released, examId}: {
@@ -45,17 +46,19 @@ export default function ExamSelector() {
     useEffect(() => {
         const token = localStorage.getItem("hfs_token")
         if (!token) {
-            alert("你还没登录诶！")
-            router.push("/")
+            setTimeout(() => {
+                toast.error("你还没登录，返回登录页")
+                router.push("/")
+            })
             return
         }
         getExamsList(token).then((exams) => {
             if (!exams.ok) {
-                alert("获取考试列表失败：" + exams.errMsg)
+                toast.error("获取考试列表失败：" + exams.errMsg)
                 return
             }
             if (!exams.examList) {
-                alert("获取考试列表失败：" + exams.errMsg)
+                toast.error("获取考试列表失败：" + exams.errMsg)
                 return
             }
             let newExams = []
@@ -73,11 +76,11 @@ export default function ExamSelector() {
         })
         getUserSnapshotAction(token).then((exams) => {
             if (!exams.ok) {
-                alert("获取用户信息失败：" + exams.errMsg)
+                toast.error("获取用户信息失败：" + exams.errMsg)
                 return
             }
             if (!exams.payload) {
-                alert("获取用户信息失败：" + exams.errMsg)
+                toast.error("获取用户信息失败：" + exams.errMsg)
                 return
             }
             setUserSnapshot(exams.payload)
