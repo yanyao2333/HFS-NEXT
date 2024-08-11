@@ -180,8 +180,6 @@ export default function ExamPage({params}: { params: { id: string } }) {
     const [isExamSnapshotWindowOpen, setIsExamSnapshotWindowOpen] = useState(false);
     const [radarChartData, setRadarChartData] = useState<any>()
     const pageRef = useRef(null)
-    const [screenshot, setScreenshot] = useState("")
-    const [showScreenshotModal, setShowScreenshotModal] = useState(false)
 
     useEffect(() => {
         const token = localStorage.getItem("hfs_token")
@@ -269,12 +267,44 @@ export default function ExamPage({params}: { params: { id: string } }) {
         })
     }
 
-    const handleDownloadScreenshot = () => {
-        const link = document.createElement('a');
-        link.href = screenshot;
-        link.download = 'screenshot.png';
-        link.click();
-    };
+    async function createScreenshot() {
+        if (!pageRef.current) {
+            throw new Error("组件根节点ref为null???")
+        }
+        const canvas = await html2canvas(pageRef.current, {
+            useCORS: true,
+            foreignObjectRendering: true,
+            onclone: (cloneNode) => {
+                // 隐藏导航栏
+                const navBar = cloneNode.querySelectorAll("nav")
+                navBar[0].style.display = "none"
+                // 去除顶层div padding-top
+                const mainDiv = cloneNode.querySelector("div") as HTMLDivElement
+                mainDiv.style.paddingTop = "0"
+                // 去除那两个功能按钮
+                const svgIcons = cloneNode.querySelectorAll("svg.size-5")
+                if (svgIcons.length != 2) {
+                    // 看起来像个啥必
+                    throw new Error("class=size-5的svg数量不为2！是否修改或新增了svg元素？记得修改screenshot代码！")
+                }
+                svgIcons.forEach((icon) => {
+                    const element = icon.parentElement as HTMLElement;
+                    element.style.display = "none"
+                })
+                // 去除所有答题卡图片，因为不知道为啥会裂图
+                const answerImages = cloneNode.querySelectorAll("img.rounded-lg.object-cover")
+                answerImages.forEach((img) => {
+                    const imgElement = img as HTMLElement // but why?
+                    imgElement.style.display = "none"
+                })
+            }
+        })
+        const dataURL = canvas.toDataURL("image/png")
+        const link = document.createElement('a')
+        link.href = dataURL
+        link.download = 'exam_' + params.id + '_screenshot.png'
+        link.click()
+    }
 
     return (
         <div
@@ -300,46 +330,25 @@ export default function ExamPage({params}: { params: { id: string } }) {
                                 </svg>
                             </div>
                             <div onClick={() => {
-                                if (pageRef.current) {
-                                    html2canvas(pageRef.current, {
-                                        useCORS: true,
-                                        foreignObjectRendering: true
-                                    }).then((canvas) => {
-                                        const dataURL = canvas.toDataURL("image/png")
-                                        setScreenshot(dataURL)
-                                        setShowScreenshotModal(true)
-                                        toast.success("生成分享截图成功")
-                                    })
-                                }
+                                toast.promise(createScreenshot(), {
+                                    loading: "正在截图",
+                                    success: "成功创建并下载截图！",
+                                    error: (err) => "创建截图失败，原因：" + err
+                                }, {
+                                    error: {
+                                        duration: 5000
+                                    }
+                                })
                             }}
                                  className="cursor-pointer flex-grow-0 border border-gray-400 rounded-full p-1 hover:bg-gray-200">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                      strokeWidth={1.5} stroke="currentColor" className="size-5">
                                     <path strokeLinecap="round" strokeLinejoin="round"
-                                          d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z"/>
+                                          d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>
                                 </svg>
+
                             </div>
                         </div>
-
-                        {showScreenshotModal && (
-                            <div
-                                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 ">
-                                <div className="relative bg-white p-6 rounded-lg text-center shadow-lg">
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img src={screenshot} alt="Screenshot" className="max-w-full max-h-[80vh] mb-4"/>
-                                    <button onClick={handleDownloadScreenshot}
-                                            className="bg-blue-500 text-white px-4 py-2 rounded shadow-lg hover:bg-blue-600 transition">
-                                        下载截图
-                                    </button>
-                                    <button onClick={() => {
-                                        setShowScreenshotModal(false)
-                                    }}
-                                            className="absolute top-2 right-2 text-2xl text-gray-500 hover:text-gray-700 transition">
-                                        ×
-                                    </button>
-                                </div>
-                            </div>
-                        )}
                     </CardHeader>
 
                     <CardContent className="grid gap-4">
