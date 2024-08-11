@@ -308,7 +308,7 @@ export default function ExamPage({params}: { params: { id: string } }) {
                             <div onClick={() => {
                                 toast.promise(createScreenshot(), {
                                     loading: "正在截图",
-                                    success: 成功创建并下载截图！<br>（答题卡图片空白是正常的）,
+                                    success: "成功创建并下载截图！（答题卡图片空白是正常的）",
                                     error: (err) => "创建截图失败，原因：" + err
                                 }, {
                                     error: {
