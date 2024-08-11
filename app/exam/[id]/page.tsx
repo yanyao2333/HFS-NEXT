@@ -142,7 +142,7 @@ function PaperShowingComponent(props: {
                             className="font-medium">{(paperRankInfo) ? (props.advancedMode) ? paperRankInfo.avg.grade : "根据要求，该数据不允许展示" : "..."}</div>
                     </div>
                 </div>
-                <div className="grid grid-flow-col gap-4">
+                <div data-html2canvas-ignore="true" className="grid grid-flow-col gap-4">
                     {answerPictureUrls.map((url, index) => {
                         // eslint-disable-next-line @next/next/no-img-element
                         return <a key={index} href={url} target={"_blank"}><img className="rounded-lg object-cover"
@@ -274,30 +274,6 @@ export default function ExamPage({params}: { params: { id: string } }) {
         const canvas = await html2canvas(pageRef.current, {
             useCORS: true,
             foreignObjectRendering: true,
-            onclone: (cloneNode) => {
-                // 隐藏导航栏
-                const navBar = cloneNode.querySelectorAll("nav")
-                navBar[0].style.display = "none"
-                // 去除顶层div padding-top
-                const mainDiv = cloneNode.querySelector("div") as HTMLDivElement
-                mainDiv.style.paddingTop = "0"
-                // 去除那两个功能按钮
-                const svgIcons = cloneNode.querySelectorAll("svg.size-5")
-                if (svgIcons.length != 2) {
-                    // 看起来像个啥必
-                    throw new Error("class=size-5的svg数量不为2！是否修改或新增了svg元素？记得修改screenshot代码！")
-                }
-                svgIcons.forEach((icon) => {
-                    const element = icon.parentElement as HTMLElement;
-                    element.style.display = "none"
-                })
-                // 去除所有答题卡图片，因为不知道为啥会裂图
-                const answerImages = cloneNode.querySelectorAll("img.rounded-lg.object-cover")
-                answerImages.forEach((img) => {
-                    const imgElement = img as HTMLElement // but why?
-                    imgElement.style.display = "none"
-                })
-            }
         })
         const dataURL = canvas.toDataURL("image/png")
         const link = document.createElement('a')
@@ -317,7 +293,7 @@ export default function ExamPage({params}: { params: { id: string } }) {
                         <CardTitle>
                             {(examDetail) ? examDetail.name : params.id}
                         </CardTitle>
-                        <div className="flex flex-row pt-3 gap-3">
+                        <div data-html2canvas-ignore="true" className="flex flex-row pt-3 gap-3">
                             <div onClick={() => {
                                 setIsExamSnapshotWindowOpen(true)
                             }}

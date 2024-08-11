@@ -38,7 +38,8 @@ export default function Navbar(props: { userName: string, router: AppRouterInsta
     }, []);
 
     return (
-        <nav className="p-4 flex justify-between items-center rounded-lg shadow-sm border-gray-200 border">
+        <nav data-html2canvas-ignore="true"
+             className="p-4 flex justify-between items-center rounded-lg shadow-sm border-gray-200 border">
             <div className="text-white">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <Link href={"/exams"}><img src={iconB64} alt="Icon" className="h-8 w-28"/></Link>
