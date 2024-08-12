@@ -4,6 +4,13 @@ export interface UserSnapshot {
     }
 }
 
+// 包含 /[id]/exam 页面所需所有数据
+export interface ExamObject {
+    detail?: ExamDetail,
+    rank?: ExamRankInfo,
+    papersInfo?: ExamDetail["papers"]
+}
+
 // 包含在试卷详情中的每科粗略信息
 export interface Paper {
     paperId: string
@@ -13,6 +20,7 @@ export interface Paper {
     manfen: number
     score: number
     weakAdvantageStatus: number // 1为优 2为正常 可能3为劣
+    rank: PaperRankInfo
 }
 
 // 获取到的试卷详情
@@ -28,7 +36,7 @@ export interface ExamDetail {
     gradeRank: number
     classDefeatRatio: number
     gradeDefeatRatio: number
-    papers: [Paper]
+    papers: Paper[]
     classRankPart: string
     gradeRankPart: string
 }

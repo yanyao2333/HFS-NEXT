@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import {getAnswerPictureAction, getPaperRankInfoAction} from "@/app/actions";
 
 // 科目详情被隐藏时的样式
-export function SubjectHidingComponent(props: { paper: Paper, changeDisplayMode: Function }) {
+export function PaperHidingComponent(props: { paper: Paper, changeDisplayMode: Function }) {
     return (
         <Card>
             <CardHeader onClick={() => {
@@ -29,7 +29,7 @@ export function SubjectHidingComponent(props: { paper: Paper, changeDisplayMode:
 }
 
 // 科目详情展示时的样式
-export function SubjectShowingComponent(props: {
+export function PaperShowingComponent(props: {
     paper: Paper,
     changeDisplayMode: Function,
     advancedMode: boolean,

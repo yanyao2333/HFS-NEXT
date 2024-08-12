@@ -1,116 +1,107 @@
 "use client"
 
-import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/card"
-import {Label} from "@/components/label"
-import {Input} from "@/components/input"
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/select"
-import {Button} from "@/components/button"
-import {useEffect, useState, useTransition} from "react";
+import {JSX, SVGProps, useEffect, useState} from "react"
+import {formatTimestamp} from "@/utils/time"
+import {getExamsList, getUserSnapshotAction} from "@/app/actions";
 import {useRouter} from "next/navigation";
-import {loginAction, validateTokenAction} from "@/app/actions";
+import {AppRouterInstance} from "next/dist/shared/lib/app-router-context.shared-runtime";
+import {UserSnapshot} from "@/types/exam";
+import Navbar from "@/components/navBar";
+import Link from "next/link";
 import toast from "react-hot-toast";
 
+// 卡片组件
+function ExamCard({name, score, released, examId}: {
+    name: string;
+    score: number;
+    released: string,
+    examId: string,
+    router: AppRouterInstance
+}): JSX.Element {
 
-enum loginRoleType {
-    parent = 2,
-    student = 1
+    return (
+        <Link
+            className="bg-white rounded-lg border shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer dark:bg-gray-900"
+            href={"/exam/" + examId}>
+            <div className="p-4 md:p-6 flex items-center justify-between">
+                <div>
+                    <h2 className="text-lg font-semibold mb-2">{name}</h2>
+                    <div className="flex items-center mb-2">
+                        <span className="text-gray-500 mr-2">成绩:</span>
+                        <span className="font-medium text-gray-800">{score}</span>
+                    </div>
+                    <div className="text-gray-500 text-sm">发布时间: {released}</div>
+                </div>
+                <ArrowRightIcon className="h-5 w-5 text-gray-500"/>
+            </div>
+        </Link>
+    )
 }
 
-export default function Login() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [mode, setMode] = useState(loginRoleType.parent.toString());
-    const [isPending, startTransition] = useTransition()
+export default function ExamSelector() {
+    const [examList, setExams] = useState<[]>([])
     const router = useRouter()
-    const [loginButtonContent, setLoginButtonContent] = useState("")
+    const [userSnapshot, setUserSnapshot] = useState<UserSnapshot>()
 
     useEffect(() => {
-        setLoginButtonContent(Math.random() < 0.4 ? "登录" : "Ciallo～(∠・ω< )")
-        const token = localStorage.getItem("hfs_token");
-        if (token) {
-            validateTokenAction(token).then((status) => {
-                if (!status.tokenExpired) {
-                    toast("你已经登录过了", {icon: "❕"})
-                    router.push("/exams")
-                } else if (status.errMsg) {
-                    toast.error("在查询是否已登录时发生错误：" + status.errMsg)
-                    return
-                }
+        const token = localStorage.getItem("hfs_token")
+        if (!token) {
+            setTimeout(() => {
+                toast.error("你还没登录，返回登录页")
+                router.push("/login")
             })
+            return
         }
-        router.prefetch("/exams")
-    }, [router])
-
-    async function handleSubmit(): Promise<void> {
-        startTransition(async () => {
-            if (!email || !password) {
-                toast.error("你还没写账号/密码呢！！！")
+        getExamsList(token).then((exams) => {
+            if (!exams.ok) {
+                toast.error("获取考试列表失败：" + exams.errMsg)
                 return
             }
-            const _token = await loginAction(email, password, Number(mode))
-            if (!_token.ok) {
-                toast.error("登录失败，原因：" + _token.payload)
+            if (!exams.examList) {
+                toast.error("获取考试列表失败：" + exams.errMsg)
                 return
             }
-            toast.success("登录成功 进入新世界")
-            localStorage.setItem("hfs_token", _token.payload)
-            router.push("/exams")
+            let newExams = []
+            for (const exam of exams.examList) {
+                newExams.push({
+                    name: exam["name"],
+                    score: exam["score"] + "/" + exam["manfen"],
+                    released: formatTimestamp(exam["time"]),
+                    examId: exam["examId"]
+                })
+            }
+            // console.log(newExams)
+            // @ts-ignore
+            setExams(newExams)
         })
-    }
+        getUserSnapshotAction(token).then((exams) => {
+            if (!exams.ok) {
+                toast.error("获取用户信息失败：" + exams.errMsg)
+                return
+            }
+            if (!exams.payload) {
+                toast.error("获取用户信息失败：" + exams.errMsg)
+                return
+            }
+            setUserSnapshot(exams.payload)
+        })
+    }, [router])
 
     // @ts-ignore
     return (
-        <div
-            className="flex flex-col px-4 pt-3 pb-2 md:px-4 md:pt-6 md:pb-2 mx-auto bg-white dark:bg-gray-900 min-h-screen">
-            <div className="flex flex-1 items-center justify-center">
-                <Card className="w-full max-w-md">
-                    <CardHeader>
-                        <CardTitle>HFS NEXT</CardTitle>
-                        <CardDescription>你的下一个好分数，何必是好分数？</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="email">邮箱/用户名/手机号</Label>
-                            <Input id="email" required type="email" value={email}
-                                   onChange={(e) => setEmail(e.target.value)}/>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="password">密码</Label>
-                            <Input id="password" required type="password" value={password}
-                                   onKeyDown={(e) => {
-                                       if (e.key === "Enter") {
-                                           handleSubmit()
-                                       }
-                                   }}
-                                   onChange={(e) => setPassword(e.target.value)}/>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="mode">登录方式</Label>
-                            {/*// @ts-ignore*/}
-                            <Select id="mode" value={mode} onValueChange={setMode}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="选择模式"/>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value={loginRoleType.parent.toString()}>家长端</SelectItem>
-                                    <SelectItem value={loginRoleType.student.toString()}>学生端</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <text className="text-sm text-gray-500 dark:text-gray-400">
-                            忘记账号密码？<a href="https://www.haofenshu.com/findPwd/?roleType=2" target="_blank"
-                                            className="underline hover:text-gray-700">点我去官网重置</a><br/><br/>没有账号密码（微信登录）请先在手机端绑定手机号并设置密码
-                        </text>
-                    </CardContent>
-                    <CardFooter>
-                        <Button className="w-full" onClick={handleSubmit}
-                                disabled={isPending}>{loginButtonContent}</Button>
-                    </CardFooter>
-                </Card>
+        <div className="flex flex-col mx-auto px-4 pt-6 pb-2 md:px-4 md:pt-6 md:pb-2 min-h-screen ">
+            <Navbar userName={(userSnapshot) ? userSnapshot.linkedStudent.studentName : "xxx家长"} router={router}/>
+            {/*<h1 className="text-2xl font-bold mb-6 md:text-3xl">考试列表</h1>*/}
+            <div className=" grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-6 md:pt-6">
+                {examList.map((exam: object) => (
+                    // @ts-ignore
+                    <ExamCard key={exam["key"]} {...exam} />
+                ))}
             </div>
+            <div className="flex-grow"></div>
             <div className="pt-10 divide-y">
                 <div></div>
-                <div className="pt-2 flex justify-between flex-col md:flex-row">
+                <div className="pt-0.5 justify-between flex flex-col md:flex-row">
                     <span className="text-gray-500 text-xs flex items-center">
                       Open Source by UselessLab on
                       <span className="inline-flex items-center ml-1">
@@ -135,7 +126,27 @@ export default function Login() {
                 </div>
             </div>
         </div>
-    );
+    )
+}
+
+function ArrowRightIcon(props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="M5 12h14"/>
+            <path d="m12 5 7 7-7 7"/>
+        </svg>
+    )
 }
 
 function GithubSVGIcon() {

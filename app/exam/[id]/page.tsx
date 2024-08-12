@@ -1,17 +1,32 @@
 "use client"
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/card"
-import {useEffect, useRef, useState} from "react"
+import {useCallback, useEffect, useRef, useState} from "react"
 import {getExamOverviewAction, getExamRankInfoAction, getUserSnapshotAction} from "@/app/actions";
-import {useRouter, useSearchParams} from "next/navigation";
+import {useRouter} from "next/navigation";
 import {formatTimestamp} from "@/utils/time";
 import Navbar from "@/components/navBar";
-import {ExamDetail, ExamRankInfo, UserSnapshot} from "@/types/exam";
+import {ExamObject, UserSnapshot} from "@/types/exam";
 import Snapshot from "@/app/exam/[id]/snapshot";
 import {Radar} from "react-chartjs-2";
 import {Chart as ChartJS, Filler, Legend, LineElement, PointElement, RadialLinearScale, Tooltip} from 'chart.js';
 import toast from "react-hot-toast";
 import html2canvas from "html2canvas";
-import {SubjectHidingComponent, SubjectShowingComponent} from "@/app/exam/[id]/subject";
+import {PaperHidingComponent, PaperShowingComponent} from "@/app/exam/[id]/paper";
+
+type ServerActionFunction = (...args: any[]) => Promise<{ ok: boolean, errMsg?: string, payload?: any }>;
+
+async function callServerAction(func: ServerActionFunction, ...args: any[]): Promise<any | null> {
+    const data = await func(...args);
+    if (!data.ok) {
+        toast.error("调用好分数API失败：" + data.errMsg);
+        return null;
+    }
+    if (!data.payload) {
+        toast.error("调用好分数API失败：" + data.errMsg);
+        return null;
+    }
+    return data.payload;
+}
 
 export default function ExamPage({params}: { params: { id: string } }) {
     ChartJS.register(
@@ -23,47 +38,24 @@ export default function ExamPage({params}: { params: { id: string } }) {
         Legend
     );
     const router = useRouter()
-    const searchParams = useSearchParams()
-    // let advancedMode = searchParams.get("advanced")
     const [advancedMode, setAdvancedMode] = useState<boolean>(false)
-    const [examDetail, setExamDetail] = useState<ExamDetail>()
-    const [examRankInfo, setExamRankInfo] = useState<ExamRankInfo>()
+    const [examObject, setExamObject] = useState<ExamObject>()
     const [displayedPapersMode, setDisplayedPapersMode] = useState<{ [index: string]: boolean }>({}) // true为显示 false为隐藏
     const [userSnapshot, setUserSnapshot] = useState<UserSnapshot>()
     const [isExamSnapshotWindowOpen, setIsExamSnapshotWindowOpen] = useState(false);
     const [radarChartData, setRadarChartData] = useState<any>()
     const pageRef = useRef(null)
 
-    useEffect(() => {
-        const token = localStorage.getItem("hfs_token")
-        if (!token) {
-            toast.error("你还没登录诶！")
-            router.push("/")
-            return
-        }
-        if (searchParams.get("advanced")) {
-            setAdvancedMode(("true" === searchParams.get("advanced")))
-        } else {
-            const localAdvancedMode = localStorage.getItem("advancedMode")
-            if (localAdvancedMode) {
-                setAdvancedMode(("1" === localAdvancedMode))
-            }
-        }
-        getExamOverviewAction(token, params.id).then((exams) => {
-            if (!exams.ok) {
-                toast.error("获取考试详情失败：" + exams.errMsg)
-                return
-            }
-            if (!exams.payload) {
-                toast.error("获取考试详情失败：" + exams.errMsg)
-                return
-            }
+    const getExamObject = useCallback(async (token: string) => {
+        const details = await callServerAction(getExamOverviewAction, token, params.id)
+        if (details) {
+            console.log(details)
             setRadarChartData({
-                labels: exams.payload.papers.map(item => item.name),
+                labels: details.papers.map((item: { name: string; }) => item.name),
                 datasets: [
                     {
                         label: "你的得分",
-                        data: exams.payload.papers.map(item => item.score),
+                        data: details.papers.map((item: { score: number; }) => item.score),
                         fill: true,
                         backgroundColor: 'rgba(255, 99, 132, 0.2)',
                         borderColor: 'rgb(255, 99, 132)',
@@ -74,7 +66,7 @@ export default function ExamPage({params}: { params: { id: string } }) {
                     },
                     {
                         label: "满分",
-                        data: exams.payload.papers.map(item => item.manfen),
+                        data: details.papers.map((item: { manfen: number; }) => item.manfen),
                         fill: true,
                         backgroundColor: 'rgba(54, 162, 235, 0.2)',
                         borderColor: 'rgb(54, 162, 235)',
@@ -85,31 +77,34 @@ export default function ExamPage({params}: { params: { id: string } }) {
                     }
                 ]
             })
-            setExamDetail(exams.payload)
+            setExamObject(prevExamObject => ({
+                ...prevExamObject,
+                detail: details
+            }))
+        }
+        const rank = await callServerAction(getExamRankInfoAction, token, params.id)
+        setExamObject(prevExamObject => ({
+            ...prevExamObject,
+            rank: rank
+        }))
+        const user = await callServerAction(getUserSnapshotAction, token)
+        setUserSnapshot(user)
+    }, [params.id])
+
+    useEffect(() => {
+        const token = localStorage.getItem("hfs_token")
+        if (!token) {
+            toast.error("你还没登录诶！")
+            router.push("/")
+            return
+        }
+        getExamObject(token).then(() => {
         })
-        getExamRankInfoAction(token, params.id).then((exams) => {
-            if (!exams.ok) {
-                toast.error("获取考试详情失败：" + exams.errMsg)
-                return
-            }
-            if (!exams.payload) {
-                toast.error("获取考试详情失败：" + exams.errMsg)
-                return
-            }
-            setExamRankInfo(exams.payload)
-        })
-        getUserSnapshotAction(token).then((exams) => {
-            if (!exams.ok) {
-                toast.error("获取用户信息失败：" + exams.errMsg)
-                return
-            }
-            if (!exams.payload) {
-                toast.error("获取用户信息失败：" + exams.errMsg)
-                return
-            }
-            setUserSnapshot(exams.payload)
-        })
-    }, [params.id, router, searchParams]);
+        const localAdvancedMode = localStorage.getItem("advancedMode")
+        if (localAdvancedMode) {
+            setAdvancedMode(("1" === localAdvancedMode))
+        }
+    }, [getExamObject, params.id, router]);
 
     function changeDisplayedMode(paperId: string) {
         setDisplayedPapersMode((prevState) => {
@@ -144,7 +139,7 @@ export default function ExamPage({params}: { params: { id: string } }) {
                 <Card>
                     <CardHeader>
                         <CardTitle>
-                            {(examDetail) ? examDetail.name : params.id}
+                            {(examObject?.detail) ? examObject.detail.name : params.id}
                         </CardTitle>
                         <div data-html2canvas-ignore="true" className="flex flex-row pt-3 gap-3">
                             <div onClick={() => {
@@ -188,58 +183,61 @@ export default function ExamPage({params}: { params: { id: string } }) {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <div className="text-sm text-gray-500 dark:text-gray-400">考试名</div>
-                                <div className="font-medium">{(examDetail) ? examDetail.name : "..."}</div>
+                                <div
+                                    className="font-medium">{(examObject?.detail) ? examObject.detail.name : "..."}</div>
                             </div>
                             <div>
                                 <div className="text-sm text-gray-500 dark:text-gray-400">考试发布时间</div>
                                 <div
-                                    className="font-medium">{(examDetail) ? formatTimestamp(examDetail.time as number) : "..."}</div>
+                                    className="font-medium">{(examObject?.detail) ? formatTimestamp(examObject.detail.time as number) : "..."}</div>
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <div className="text-sm text-gray-500 dark:text-gray-400">满分</div>
-                                <div className="font-medium">{(examDetail) ? examDetail.manfen : "..."}</div>
+                                <div
+                                    className="font-medium">{(examObject?.detail) ? examObject.detail.manfen : "..."}</div>
                             </div>
                             <div>
                                 <div className="text-sm text-gray-500 dark:text-gray-400">得分</div>
-                                <div className="font-medium">{(examDetail) ? examDetail.score : "..."}</div>
+                                <div
+                                    className="font-medium">{(examObject?.detail) ? examObject.detail.score : "..."}</div>
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <div className="text-sm text-gray-500 dark:text-gray-400">班级排名/等第</div>
                                 <div
-                                    className="font-medium">{(examDetail) ? (advancedMode) ? examDetail.classRank + " (打败了全班" + examDetail.classDefeatRatio + "%的人)" : examDetail.classRankPart : "..."}</div>
+                                    className="font-medium">{(examObject?.detail) ? (advancedMode) ? examObject.detail.classRank + " (打败了全班" + examObject.detail.classDefeatRatio + "%的人)" : examObject.detail.classRankPart : "..."}</div>
                             </div>
                             <div>
                                 <div className="text-sm text-gray-500 dark:text-gray-400">年级排名/等第</div>
                                 <div
-                                    className="font-medium">{(examDetail) ? (advancedMode) ? examDetail.gradeRank + " (打败了全年级" + examDetail.gradeDefeatRatio + "%的人)" : examDetail.gradeRankPart : "..."}</div>
+                                    className="font-medium">{(examObject?.detail) ? (advancedMode) ? examObject.detail.gradeRank + " (打败了全年级" + examObject.detail.gradeDefeatRatio + "%的人)" : examObject.detail.gradeRankPart : "..."}</div>
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <div className="text-sm text-gray-500 dark:text-gray-400">班级最高分</div>
                                 <div
-                                    className="font-medium">{(examRankInfo) ? (advancedMode) ? examRankInfo.highest.class : "根据要求，该数据不允许展示" : "..."}</div>
+                                    className="font-medium">{(examObject?.rank) ? (advancedMode) ? examObject.rank.highest.class : "根据要求，该数据不允许展示" : "..."}</div>
                             </div>
                             <div>
                                 <div className="text-sm text-gray-500 dark:text-gray-400">年级最高分</div>
                                 <div
-                                    className="font-medium">{(examRankInfo) ? (advancedMode) ? examRankInfo.highest.grade : "根据要求，该数据不允许展示" : "..."}</div>
+                                    className="font-medium">{(examObject?.rank) ? (advancedMode) ? examObject.rank.highest.grade : "根据要求，该数据不允许展示" : "..."}</div>
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <div className="text-sm text-gray-500 dark:text-gray-400">班级平均分</div>
                                 <div
-                                    className="font-medium">{(examRankInfo) ? (advancedMode) ? examRankInfo.avg.class : "根据要求，该数据不允许展示" : "..."}</div>
+                                    className="font-medium">{(examObject?.rank) ? (advancedMode) ? examObject.rank.avg.class : "根据要求，该数据不允许展示" : "..."}</div>
                             </div>
                             <div>
                                 <div className="text-sm text-gray-500 dark:text-gray-400">年级平均分</div>
                                 <div
-                                    className="font-medium">{(examRankInfo) ? (advancedMode) ? examRankInfo.avg.grade : "根据要求，该数据不允许展示" : "..."}</div>
+                                    className="font-medium">{(examObject?.rank) ? (advancedMode) ? examObject.rank.avg.grade : "根据要求，该数据不允许展示" : "..."}</div>
                             </div>
                         </div>
                         <div className="h-80 w-80 justify-self-center">
@@ -257,16 +255,17 @@ export default function ExamPage({params}: { params: { id: string } }) {
                     </CardHeader>
                     <CardContent>
                         <div className="grid gap-4">
-                            {examDetail?.papers.map((item) => {
+                            {examObject?.detail?.papers.map((item) => {
                                 let component
                                 (!displayedPapersMode[item.paperId]) ?
                                     component =
-                                        <SubjectHidingComponent paper={item} changeDisplayMode={changeDisplayedMode}
-                                                                key={item.paperId}/>
+                                        <PaperHidingComponent paper={item} changeDisplayMode={changeDisplayedMode}
+                                                              key={item.paperId}/>
                                     : component =
-                                        <SubjectShowingComponent paper={item} changeDisplayMode={changeDisplayedMode}
-                                                                 advancedMode={advancedMode} router={router}
-                                                                 examId={String(examDetail?.examId)} key={item.paperId}/>
+                                        <PaperShowingComponent paper={item} changeDisplayMode={changeDisplayedMode}
+                                                               advancedMode={advancedMode} router={router}
+                                                               examId={String(examObject?.detail?.examId)}
+                                                               key={item.paperId}/>
                                 return component
                             })}
                         </div>

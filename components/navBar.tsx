@@ -27,7 +27,7 @@ export default function Navbar(props: { userName: string, router: AppRouterInsta
     function handleLogout() {
         localStorage.removeItem("hfs_token")
         toast.success("已退出登录，返回登录页")
-        props.router.push("/")
+        props.router.push("/login")
     }
 
     useEffect(() => {
@@ -42,7 +42,7 @@ export default function Navbar(props: { userName: string, router: AppRouterInsta
              className="p-4 flex justify-between items-center rounded-lg shadow-sm border-gray-200 border">
             <div className="text-white">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <Link href={"/exams"}><img src={iconB64} alt="Icon" className="h-8 w-28"/></Link>
+                <Link href={"/"}><img src={iconB64} alt="Icon" className="h-8 w-28"/></Link>
             </div>
             <div className="relative" ref={dropdownRef}>
                 <button onClick={toggleDropdown} className="focus:outline-none flex items-center space-x-2">
