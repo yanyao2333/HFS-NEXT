@@ -1,14 +1,14 @@
-/** @type {import('next').NextConfig} */
+/** @type {import("next").NextConfig} */
 const nextConfig = {
     images: {
         remotePatterns: [
             {
                 protocol: "https",
-                hostname: "yj-oss.yunxiao.com"
-            }
+                hostname: "yj-oss.yunxiao.com",
+            },
         ],
     },
     experimental: {},
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
