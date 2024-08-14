@@ -1,5 +1,6 @@
 "use client";
-import {getExamOverviewAction, getExamRankInfoAction, getUserSnapshotAction} from "@/app/actions";
+import {fetchHFSApi} from "@/app/actions";
+import {HFS_APIs} from "@/app/constants";
 import {PaperHidingComponent, PaperShowingComponent} from "@/app/exam/[id]/paper";
 import Snapshot from "@/app/exam/[id]/snapshot";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/card";
@@ -12,26 +13,6 @@ import {useRouter} from "next/navigation";
 import {useCallback, useEffect, useRef, useState} from "react";
 import {Radar} from "react-chartjs-2";
 import toast from "react-hot-toast";
-
-type ServerActionFunction = (
-    ...args: any[]
-) => Promise<{ ok: boolean; errMsg?: string; payload?: any }>;
-
-async function callServerAction(
-    func: ServerActionFunction,
-    ...args: any[]
-): Promise<any | null> {
-    const data = await func(...args);
-    if (!data.ok) {
-        toast.error("调用好分数API失败：" + data.errMsg);
-        return null;
-    }
-    if (!data.payload) {
-        toast.error("调用好分数API失败：" + data.errMsg);
-        return null;
-    }
-    return data.payload;
-}
 
 export default function ExamPage({params}: { params: { id: string } }) {
     ChartJS.register(
@@ -54,21 +35,34 @@ export default function ExamPage({params}: { params: { id: string } }) {
     const [radarChartData, setRadarChartData] = useState<any>();
     const pageRef = useRef(null);
 
-    const getExamObject = useCallback(
-        async (token: string) => {
-            const details = await callServerAction(
-                getExamOverviewAction,
-                token,
-                params.id,
-            );
-            if (details) {
-                console.log(details);
+    const getExamObject = useCallback(async (token: string) => {
+            const [details, examRank, userSnapshot] = await Promise.allSettled([
+                fetchHFSApi(HFS_APIs.examOverview, {
+                    token: token,
+                    method: "GET",
+                    getParams: {
+                        examId: params.id,
+                    },
+                }),
+                fetchHFSApi(HFS_APIs.examRankInfo, {
+                    token: token,
+                    method: "GET",
+                    getParams: {
+                        examId: params.id,
+                    },
+                }),
+                fetchHFSApi(HFS_APIs.userSnapshot, {
+                    token: token,
+                    method: "GET",
+                }),
+            ]) as unknown as PromiseFulfilledResult<{ payload?: any, ok: boolean, errMsg?: string | undefined }>[]; // 我们在fetch中做了错误捕捉，所以不会为rejected
+            if (details.value.ok) {
                 setRadarChartData({
-                    labels: details.papers.map((item: { name: string }) => item.name),
+                    labels: details.value.payload.papers.map((item: { name: string }) => item.name),
                     datasets: [
                         {
                             label: "你的得分",
-                            data: details.papers.map((item: { score: number }) => item.score),
+                            data: details.value.payload.papers.map((item: { score: number }) => item.score),
                             fill: true,
                             backgroundColor: "rgba(255, 99, 132, 0.2)",
                             borderColor: "rgb(255, 99, 132)",
@@ -79,7 +73,7 @@ export default function ExamPage({params}: { params: { id: string } }) {
                         },
                         {
                             label: "满分",
-                            data: details.papers.map(
+                            data: details.value.payload.papers.map(
                                 (item: { manfen: number }) => item.manfen,
                             ),
                             fill: true,
@@ -94,20 +88,22 @@ export default function ExamPage({params}: { params: { id: string } }) {
                 });
                 setExamObject((prevExamObject) => ({
                     ...prevExamObject,
-                    detail: details,
+                    detail: details.value.payload,
                 }));
+            } else {
+                toast.error("调用好分数API失败：" + details.value.errMsg);
             }
-            const rank = await callServerAction(
-                getExamRankInfoAction,
-                token,
-                params.id,
-            );
+            if (!examRank.value.ok) {
+                toast.error("调用好分数API失败：" + examRank.value.errMsg);
+            }
             setExamObject((prevExamObject) => ({
                 ...prevExamObject,
-                rank: rank,
+                rank: examRank.value.payload,
             }));
-            const user = await callServerAction(getUserSnapshotAction, token);
-            setUserSnapshot(user);
+            if (!userSnapshot.value.ok) {
+                toast.error("调用好分数API失败：" + userSnapshot.value.errMsg);
+            }
+            setUserSnapshot(userSnapshot.value.payload);
         },
         [params.id],
     );
@@ -116,11 +112,10 @@ export default function ExamPage({params}: { params: { id: string } }) {
         const token = localStorage.getItem("hfs_token");
         if (!token) {
             toast.error("你还没登录诶！");
-            router.push("/");
+            router.push("/login");
             return;
         }
-        getExamObject(token).then(() => {
-        });
+        getExamObject(token).then();
         const localAdvancedMode = localStorage.getItem("advancedMode");
         if (localAdvancedMode) {
             setAdvancedMode("1" === localAdvancedMode);

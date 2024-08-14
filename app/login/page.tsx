@@ -1,6 +1,7 @@
 "use client";
 
-import {loginAction, validateTokenAction} from "@/app/actions";
+import {fetchHFSApi, validateTokenAction} from "@/app/actions";
+import {HFS_APIs} from "@/app/constants";
 import {Button} from "@/components/button";
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/card";
 import {Input} from "@/components/input";
@@ -18,7 +19,7 @@ enum loginRoleType {
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [mode, setMode] = useState(loginRoleType.parent.toString());
+    const [role, setRole] = useState(loginRoleType.parent.toString());
     const [isPending, startTransition] = useTransition();
     const router = useRouter();
     const [loginButtonContent, setLoginButtonContent] = useState("");
@@ -37,7 +38,7 @@ export default function Login() {
                 }
             });
         }
-        router.prefetch("/exams");
+        router.prefetch("/");
     }, [router]);
 
     async function handleSubmit(): Promise<void> {
@@ -46,14 +47,24 @@ export default function Login() {
                 toast.error("你还没写账号/密码呢！！！");
                 return;
             }
-            const _token = await loginAction(email, password, Number(mode));
+            const _token = await fetchHFSApi(HFS_APIs.login, {
+                method: "POST",
+                token: "114514",
+                postBody: {
+                    loginName: email,
+                    password: btoa(password),
+                    roleType: role,
+                    loginType: 1,
+                    rememberMe: 2,
+                },
+            });
             if (!_token.ok) {
-                toast.error("登录失败，原因：" + _token.payload);
+                toast.error("登录失败，原因：" + _token.errMsg);
                 return;
             }
             toast.success("登录成功 进入新世界");
-            localStorage.setItem("hfs_token", _token.payload);
-            router.push("/exams");
+            localStorage.setItem("hfs_token", _token.payload.token);
+            router.push("/");
         });
     }
 
@@ -96,7 +107,7 @@ export default function Login() {
                         <div className="space-y-2">
                             <Label htmlFor="mode">登录方式</Label>
                             {/*// @ts-ignore*/}
-                            <Select id="mode" value={mode} onValueChange={setMode}>
+                            <Select id="mode" value={role} onValueChange={setRole}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="选择模式"/>
                                 </SelectTrigger>
