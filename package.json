@@ -25,7 +25,9 @@
     "autoprefixer": "10.4.19",
     "chart.js": "^4.4.3",
     "class-variance-authority": "^0.7.0",
+    "client-only": "^0.0.1",
     "clsx": "^2.1.1",
+    "eslint": "^8.49.0",
     "eslint-config-next": "14.2.1",
     "framer-motion": "^11.1.1",
     "html2canvas": "^1.4.1",
@@ -44,7 +46,6 @@
     "tailwind-variants": "^0.1.20",
     "tailwindcss": "3.4.3",
     "tailwindcss-animate": "^1.0.7",
-    "typescript": "5.0.4",
-    "eslint": "^8.49.0"
+    "typescript": "5.0.4"
   }
 }
