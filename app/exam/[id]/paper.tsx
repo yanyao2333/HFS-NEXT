@@ -46,12 +46,13 @@ export function PaperHidingComponent(props: {
 }
 
 // 科目详情展示时的样式
-export function PaperShowingComponent({paper, changeDisplayMode, advancedMode, router, examId}: {
+export function PaperShowingComponent({paper, changeDisplayMode, advancedMode, router, examId, setPapersObject}: {
   paper: Paper;
   changeDisplayMode: Function;
   advancedMode: boolean;
   router: AppRouterInstance;
   examId: string;
+  setPapersObject: Function;
 }) {
   const [paperRankInfo, setPaperRankInfo] = useState<PaperRankInfo>();
   const [answerPictureUrls, setAnswerPictureUrls] = useState<string[]>([]);
@@ -75,17 +76,28 @@ export function PaperShowingComponent({paper, changeDisplayMode, advancedMode, r
         },
       }),
     ]) as unknown as PromiseFulfilledResult<{ payload?: any, ok: boolean, errMsg?: string | undefined }>[];
-    if (paperRank.value.ok) {
-      setPaperRankInfo(paperRank.value.payload);
-    } else {
+    if (!paperRank.value.ok) {
       toast.error("获取答题卡排名信息失败：" + paperRank.value.errMsg);
     }
-    if (answerPicture.value.ok) {
-      setAnswerPictureUrls(answerPicture.value.payload["url"]);
-    } else {
+    if (!answerPicture.value.ok) {
       toast.error("获取答题卡图片失败：" + answerPicture.value.errMsg);
     }
-  }, [examId, paper]);
+
+    setPaperRankInfo(paperRank.value.payload);
+    setAnswerPictureUrls(answerPicture.value.payload ? answerPicture.value.payload["url"] : []);
+    setPapersObject((prevObject: any) => {
+      const updatedPaper = {
+        ...paper,
+        rank: paperRank.value.payload,
+        paperImages: answerPicture.value.payload["url"],
+      };
+
+      return {
+        ...prevObject,
+        [updatedPaper.paperId]: updatedPaper,
+      };
+    });
+  }, [examId, paper, setPapersObject]);
 
   useEffect(() => {
     const token = localStorage.getItem("hfs_token");

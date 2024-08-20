@@ -9,6 +9,9 @@ const nextConfig = {
     ],
   },
   experimental: {},
+  env: {
+    URL: "http://localhost:3000",
+  },
 };
 
 module.exports = nextConfig;
