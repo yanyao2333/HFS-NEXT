@@ -10,7 +10,7 @@ const nextConfig = {
   },
   experimental: {},
   env: {
-    URL: "http://localhost:3000",
+    URL: "https://hfs.uselesslab.top/",
   },
 };
 
