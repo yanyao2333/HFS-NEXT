@@ -5,7 +5,7 @@ import {PaperHidingComponent, PaperShowingComponent} from "@/app/exam/[id]/paper
 import Snapshot from "@/app/exam/[id]/snapshot";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/card";
 import Navbar from "@/components/navBar";
-import {ExamObject, UserSnapshot} from "@/types/exam";
+import {ExamObject, PapersObject, UserSnapshot} from "@/types/exam";
 import {formatTimestamp} from "@/utils/time";
 import {Chart as ChartJS, Filler, Legend, LineElement, PointElement, RadialLinearScale, Tooltip} from "chart.js";
 import html2canvas from "html2canvas";
@@ -34,6 +34,7 @@ export default function ExamPage({params}: { params: { id: string } }) {
     useState(false);
   const [radarChartData, setRadarChartData] = useState<any>();
   const pageRef = useRef(null);
+  const [papersObject, setPapersObject] = useState<PapersObject>();
 
   const getExamObject = useCallback(async (token: string) => {
       const [details, examRank, userSnapshot] = await Promise.allSettled([
@@ -370,6 +371,8 @@ export default function ExamPage({params}: { params: { id: string } }) {
                 onClose={() => {
                   setIsExamSnapshotWindowOpen(false);
                 }}
+                examObject={examObject}
+                papersObject={papersObject}
               />
             )}
           </CardContent>
@@ -397,6 +400,7 @@ export default function ExamPage({params}: { params: { id: string } }) {
                       advancedMode={advancedMode}
                       router={router}
                       examId={String(examObject?.detail?.examId)}
+                      setPapersObject={setPapersObject}
                       key={item.paperId}
                     />
                   ));

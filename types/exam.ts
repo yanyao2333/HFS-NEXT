@@ -9,10 +9,7 @@ export interface ExamObject {
   rank?: ExamRankInfo;
 }
 
-// 保存快照时需要的数据
-export interface ExamSnapshotObject extends ExamObject {
-  papersInfo?: { [paperId: string]: Paper };
-}
+export type PapersObject = { [paperId: string]: Paper }
 
 // 包含在试卷详情中的每科粗略信息
 export interface Paper {
@@ -24,7 +21,7 @@ export interface Paper {
   score: number;
   // 1为优 2为正常 可能3为劣
   weakAdvantageStatus: number;
-  rank: PaperRankInfo;
+  rank?: PaperRankInfo;
   paperImages?: string[];
 }
 
