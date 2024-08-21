@@ -23,16 +23,13 @@ export default function Snapshot({onClose, examObject, papersObject}: {
     const outputJson = JSON.stringify({
       examObject: examObject,
       papersObject: papersObject,
-    });
-    const zip = new JSZip();
-    zip.file("data.json", outputJson);
+    }, null, 2);
     if (!downloadImage) {
-      zip.generateAsync({type: "blob"})
-        .then(function (content) {
-          saveAs(content, "snapshot_exam" + examObject.detail?.examId + "_" + Date.now() + ".zip");
-        });
+      saveAs(new Blob([outputJson], {type: "application/json"}), "snapshot_simple_exam" + examObject.detail?.examId + "_" + Date.now() + ".json");
       return true;
     }
+    const zip = new JSZip();
+    zip.file("data.json", outputJson);
     const imageFolder = zip.folder("images");
     // 这么写不好，但我不想再遍历papersObject了
     const imageElements = Array.from(document.querySelectorAll("img.rounded-lg.object-cover")) as HTMLImageElement[];
@@ -89,7 +86,7 @@ export default function Snapshot({onClose, examObject, papersObject}: {
         <div>
           <div>
             <p className="text-gray-700 dark:text-gray-300 mb-4">
-              好分数非会员用户只能查看120天内的试卷，可以用该功能保存该次考试所有数据（包括答题卡），以备不时之需
+              好分数非会员用户只能查看120天内的试卷，可以用该功能保存该次考试从api获取的所有原始数据，以备不时之需
               <br/>
               <br/>
               <input
