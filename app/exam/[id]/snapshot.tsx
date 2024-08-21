@@ -1,6 +1,7 @@
 import {ExamObject, PapersObject} from "@/types/exam";
 import {saveAs} from "file-saver";
 import JSZip from "jszip";
+import {useState} from "react";
 import toast from "react-hot-toast";
 
 export default function Snapshot({onClose, examObject, papersObject}: {
@@ -8,6 +9,7 @@ export default function Snapshot({onClose, examObject, papersObject}: {
   examObject: ExamObject | undefined,
   papersObject: PapersObject | undefined
 }) {
+  const [downloadImage, setDownloadImage] = useState(true);
 
   async function handleSaveSnapshot() {
     if (!examObject) {
@@ -24,6 +26,13 @@ export default function Snapshot({onClose, examObject, papersObject}: {
     });
     const zip = new JSZip();
     zip.file("data.json", outputJson);
+    if (!downloadImage) {
+      zip.generateAsync({type: "blob"})
+        .then(function (content) {
+          saveAs(content, "snapshot_exam" + examObject.detail?.examId + "_" + Date.now() + ".zip");
+        });
+      return true;
+    }
     const imageFolder = zip.folder("images");
     // 这么写不好，但我不想再遍历papersObject了
     const imageElements = Array.from(document.querySelectorAll("img.rounded-lg.object-cover")) as HTMLImageElement[];
@@ -82,9 +91,24 @@ export default function Snapshot({onClose, examObject, papersObject}: {
             <p className="text-gray-700 dark:text-gray-300 mb-4">
               好分数非会员用户只能查看120天内的试卷，可以用该功能保存该次考试所有数据（包括答题卡），以备不时之需
               <br/>
+              <br/>
+              <input
+                className="h-3.5 w-3.5"
+                type="checkbox"
+                id="downloadImage"
+                onChange={(e) => {
+                  setDownloadImage(e.target.checked);
+                }}
+                checked={downloadImage}
+              />
+              <label htmlFor="downloadImage" className="h-5 w-5 pl-1">
+                下载答题卡图片（可能会比较慢）
+              </label>
+              <br/>
+              <br/>
               <span style={{color: "red"}} className="text-xl">
                   请务必先点开下方所有科目的详情并等待加载完成！
-                </span>
+              </span>
             </p>
             <div className="flex justify-center gap-8">
               <button
@@ -103,7 +127,7 @@ export default function Snapshot({onClose, examObject, papersObject}: {
                       }
                     }),
                     {
-                      loading: "正在打包（由于要下载图片，速度可能比较慢）",
+                      loading: downloadImage ? "正在打包（由于要下载图片，速度可能比较慢）" : "正在打包",
                       error: "发生错误！稍后再试试吧！",
                       success: "打包成功！正在下载~",
                     });
