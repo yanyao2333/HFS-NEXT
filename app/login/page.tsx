@@ -1,6 +1,6 @@
 "use client";
 
-import {fetchHFSApi, validateTokenAction} from "@/app/actions";
+import {fetchHFSApi} from "@/app/actions";
 import {HFS_APIs} from "@/app/constants";
 import {Button} from "@/components/button";
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/card";
@@ -28,12 +28,13 @@ export default function Login() {
     setLoginButtonContent(Math.random() < 0.4 ? "登录" : "Ciallo～(∠・ω< )");
     const token = localStorage.getItem("hfs_token");
     if (token) {
-      validateTokenAction(token).then((status) => {
-        if (!status.tokenExpired) {
-          toast("你已经登录过了", {icon: "❕"});
+      fetchHFSApi(HFS_APIs.userSnapshot, {
+        token: token,
+        method: "GET",
+      }).then((status) => {
+        if (status.ok) {
+          toast("你已经登录过了 重定向到主页");
           router.push("/");
-        } else if (status.errMsg) {
-          toast.error("在查询是否已登录时发生错误：" + status.errMsg);
           return;
         }
       });

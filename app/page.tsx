@@ -1,6 +1,7 @@
 "use client";
 
-import {getExamsList, getUserSnapshotAction} from "@/app/actions";
+import {fetchHFSApi} from "@/app/actions";
+import {HFS_APIs} from "@/app/constants";
 import Navbar from "@/components/navBar";
 import {UserSnapshot} from "@/types/exam";
 import {formatTimestamp} from "@/utils/time";
@@ -17,11 +18,11 @@ function ExamCard({
                     released,
                     examId,
                   }: {
-  name: string;
-  score: number;
-  released: string;
-  examId: string;
-  router: AppRouterInstance;
+  name: string,
+  score: number,
+  released: string,
+  examId: string,
+  router: AppRouterInstance,
 }): JSX.Element {
   return (
     <Link
@@ -44,7 +45,7 @@ function ExamCard({
 }
 
 export default function ExamSelector() {
-  const [examList, setExams] = useState<[]>([]);
+  const [examList, setExams] = useState<{ name: any, score: string, released: string, examId: any }[]>([]);
   const router = useRouter();
   const [userSnapshot, setUserSnapshot] = useState<UserSnapshot>();
 
@@ -57,17 +58,20 @@ export default function ExamSelector() {
       });
       return;
     }
-    getExamsList(token).then((exams) => {
+    fetchHFSApi(HFS_APIs.examList, {
+      method: "GET",
+      token: token,
+    }).then((exams) => {
       if (!exams.ok) {
         toast.error("获取考试列表失败：" + exams.errMsg);
         return;
       }
-      if (!exams.examList) {
+      if (!exams.payload["list"]) {
         toast.error("获取考试列表失败：" + exams.errMsg);
         return;
       }
       let newExams = [];
-      for (const exam of exams.examList) {
+      for (const exam of exams.payload["list"]) {
         newExams.push({
           name: exam["name"],
           score: exam["score"] + "/" + exam["manfen"],
@@ -75,11 +79,12 @@ export default function ExamSelector() {
           examId: exam["examId"],
         });
       }
-      // console.log(newExams)
-      // @ts-ignore
       setExams(newExams);
     });
-    getUserSnapshotAction(token).then((exams) => {
+    fetchHFSApi(HFS_APIs.userSnapshot, {
+      token: token,
+      method: "GET",
+    }).then((exams) => {
       if (!exams.ok) {
         toast.error("获取用户信息失败：" + exams.errMsg);
         return;
@@ -101,11 +106,9 @@ export default function ExamSelector() {
         }
         router={router}
       />
-      {/*<h1 className="text-2xl font-bold mb-6 md:text-3xl">考试列表</h1>*/}
       <div className=" grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-6 md:pt-6">
-        {examList.map((exam: object) => (
-          // @ts-ignore
-          <ExamCard key={exam["key"]} {...exam} />
+        {examList.map((exam: any) => (
+          <ExamCard key={exam.key} {...exam} />
         ))}
       </div>
       <div className="flex-grow"></div>
