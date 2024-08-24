@@ -1,20 +1,18 @@
 "use client";
-import {fetchHFSApi} from "@/app/actions";
-import {HFS_APIs} from "@/app/constants";
-import {PaperHidingComponent, PaperShowingComponent} from "@/app/exam/[id]/paper";
-import Snapshot from "@/app/exam/[id]/snapshot";
+import {PaperHidingComponent, PaperShowingComponent} from "@/app/snapshot/paper";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/card";
 import Navbar from "@/components/navBar";
-import {ExamObject, PapersObject, UserSnapshot} from "@/types/exam";
+import {ExamObject, PapersObject} from "@/types/exam";
 import {formatTimestamp} from "@/utils/time";
 import {Chart as ChartJS, Filler, Legend, LineElement, PointElement, RadialLinearScale, Tooltip} from "chart.js";
 import html2canvas from "html2canvas";
 import {useRouter} from "next/navigation";
-import {useCallback, useEffect, useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {Radar} from "react-chartjs-2";
 import toast from "react-hot-toast";
 
-export default function ExamPage({params}: { params: { id: string } }) {
+
+export function ExamPage({papersObject, examObject}: { papersObject: PapersObject, examObject: ExamObject }) {
   ChartJS.register(
     RadialLinearScale,
     PointElement,
@@ -24,104 +22,44 @@ export default function ExamPage({params}: { params: { id: string } }) {
     Legend,
   );
   const router = useRouter();
-  const [advancedMode, setAdvancedMode] = useState<boolean>(false);
-  const [examObject, setExamObject] = useState<ExamObject>();
   const [displayedPapersMode, setDisplayedPapersMode] = useState<{
     [index: string]: boolean;
   }>({}); // true为显示 false为隐藏
-  const [userSnapshot, setUserSnapshot] = useState<UserSnapshot>();
-  const [isExamSnapshotWindowOpen, setIsExamSnapshotWindowOpen] =
-    useState(false);
   const [radarChartData, setRadarChartData] = useState<any>();
   const pageRef = useRef(null);
-  const [papersObject, setPapersObject] = useState<PapersObject>();
-
-  const getExamObject = useCallback(async (token: string) => {
-      const [details, examRank, userSnapshot] = await Promise.allSettled([
-        fetchHFSApi(HFS_APIs.examOverview, {
-          token: token,
-          method: "GET",
-          getParams: {
-            examId: params.id,
-          },
-        }),
-        fetchHFSApi(HFS_APIs.examRankInfo, {
-          token: token,
-          method: "GET",
-          getParams: {
-            examId: params.id,
-          },
-        }),
-        fetchHFSApi(HFS_APIs.userSnapshot, {
-          token: token,
-          method: "GET",
-        }),
-      ]) as unknown as PromiseFulfilledResult<{ payload?: any, ok: boolean, errMsg?: string | undefined }>[]; // 我们在fetch中做了错误捕捉，所以不会为rejected
-      if (details.value.ok) {
-        setRadarChartData({
-          labels: details.value.payload.papers.map((item: { name: string }) => item.name),
-          datasets: [
-            {
-              label: "你的得分",
-              data: details.value.payload.papers.map((item: { score: number }) => item.score),
-              fill: true,
-              backgroundColor: "rgba(255, 99, 132, 0.2)",
-              borderColor: "rgb(255, 99, 132)",
-              pointBackgroundColor: "rgb(255, 99, 132)",
-              pointBorderColor: "#fff",
-              pointHoverBackgroundColor: "#fff",
-              pointHoverBorderColor: "rgb(255, 99, 132)",
-            },
-            {
-              label: "满分",
-              data: details.value.payload.papers.map(
-                (item: { manfen: number }) => item.manfen,
-              ),
-              fill: true,
-              backgroundColor: "rgba(54, 162, 235, 0.2)",
-              borderColor: "rgb(54, 162, 235)",
-              pointBackgroundColor: "rgb(54, 162, 235)",
-              pointBorderColor: "#fff",
-              pointHoverBackgroundColor: "#fff",
-              pointHoverBorderColor: "rgb(54, 162, 235)",
-            },
-          ],
-        });
-        setExamObject((prevExamObject) => ({
-          ...prevExamObject,
-          detail: details.value.payload,
-        }));
-      } else {
-        toast.error("调用好分数API失败：" + details.value.errMsg);
-      }
-      if (!examRank.value.ok) {
-        toast.error("调用好分数API失败：" + examRank.value.errMsg);
-      }
-      setExamObject((prevExamObject) => ({
-        ...prevExamObject,
-        rank: examRank.value.payload,
-      }));
-      if (!userSnapshot.value.ok) {
-        toast.error("调用好分数API失败：" + userSnapshot.value.errMsg);
-      }
-      setUserSnapshot(userSnapshot.value.payload);
-    },
-    [params.id],
-  );
+  const advancedMode = true;
 
   useEffect(() => {
-    const token = localStorage.getItem("hfs_token");
-    if (!token) {
-      toast.error("你还没登录诶！");
-      router.push("/login");
-      return;
-    }
-    getExamObject(token).then();
-    const localAdvancedMode = localStorage.getItem("advancedMode");
-    if (localAdvancedMode) {
-      setAdvancedMode("1" === localAdvancedMode);
-    }
-  }, [getExamObject, params.id, router]);
+    setRadarChartData({
+      labels: examObject.detail?.papers.map((item: { name: string }) => item.name),
+      datasets: [
+        {
+          label: "你的得分",
+          data: examObject.detail?.papers.map((item: { score: number }) => item.score),
+          fill: true,
+          backgroundColor: "rgba(255, 99, 132, 0.2)",
+          borderColor: "rgb(255, 99, 132)",
+          pointBackgroundColor: "rgb(255, 99, 132)",
+          pointBorderColor: "#fff",
+          pointHoverBackgroundColor: "#fff",
+          pointHoverBorderColor: "rgb(255, 99, 132)",
+        },
+        {
+          label: "满分",
+          data: examObject.detail?.papers.map(
+            (item: { manfen: number }) => item.manfen,
+          ),
+          fill: true,
+          backgroundColor: "rgba(54, 162, 235, 0.2)",
+          borderColor: "rgb(54, 162, 235)",
+          pointBackgroundColor: "rgb(54, 162, 235)",
+          pointBorderColor: "#fff",
+          pointHoverBackgroundColor: "#fff",
+          pointHoverBorderColor: "rgb(54, 162, 235)",
+        },
+      ],
+    });
+  }, [examObject.detail?.papers]);
 
   function changeDisplayedMode(paperId: string) {
     setDisplayedPapersMode((prevState) => {
@@ -143,7 +81,7 @@ export default function ExamPage({params}: { params: { id: string } }) {
     const dataURL = canvas.toDataURL("image/png");
     const link = document.createElement("a");
     link.href = dataURL;
-    link.download = "exam_" + params.id + "_screenshot.png";
+    link.download = "exam_" + examObject.detail?.examId + "_screenshot.png";
     link.click();
   }
 
@@ -154,42 +92,19 @@ export default function ExamPage({params}: { params: { id: string } }) {
     >
       <Navbar
         router={router}
-        userName={
-          userSnapshot ? userSnapshot.linkedStudent.studentName : "xxx家长"
-        }
-        snapshotMode={false}
+        userName="试卷快照"
+        snapshotMode={true}
       />
       <div className="flex flex-col gap-6 pt-6">
         <Card>
           <CardHeader>
             <CardTitle>
-              {examObject?.detail ? examObject.detail.name : params.id}
+              {examObject.detail?.name}
             </CardTitle>
             <div
               data-html2canvas-ignore="true"
               className="flex flex-row pt-3 gap-3"
             >
-              <div
-                onClick={() => {
-                  setIsExamSnapshotWindowOpen(true);
-                }}
-                className="cursor-pointer flex-grow-0 border border-gray-400 rounded-full p-1 hover:bg-gray-200"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="size-5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0-3-3m3 3 3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"
-                  />
-                </svg>
-              </div>
               <div
                 onClick={() => {
                   toast.promise(
@@ -363,16 +278,6 @@ export default function ExamPage({params}: { params: { id: string } }) {
                 <div/>
               )}
             </div>
-            {/* 快照弹窗 */}
-            {isExamSnapshotWindowOpen && (
-              <Snapshot
-                onClose={() => {
-                  setIsExamSnapshotWindowOpen(false);
-                }}
-                examObject={examObject}
-                papersObject={papersObject}
-              />
-            )}
           </CardContent>
         </Card>
         <Card>
@@ -381,25 +286,21 @@ export default function ExamPage({params}: { params: { id: string } }) {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4">
-              {examObject?.detail?.papers.map((item) => {
+              {Object.keys(papersObject).map((paperId) => {
                 let component;
-                !displayedPapersMode[item.paperId]
+                !displayedPapersMode[paperId]
                   ? (component = (
                     <PaperHidingComponent
-                      paper={item}
+                      paper={papersObject[paperId]}
                       changeDisplayMode={changeDisplayedMode}
-                      key={item.paperId}
+                      key={paperId}
                     />
                   ))
                   : (component = (
                     <PaperShowingComponent
-                      paper={item}
+                      paper={papersObject[paperId]}
                       changeDisplayMode={changeDisplayedMode}
-                      advancedMode={advancedMode}
-                      router={router}
-                      examId={String(examObject?.detail?.examId)}
-                      setPapersObject={setPapersObject}
-                      key={item.paperId}
+                      key={paperId}
                     />
                   ));
                 return component;

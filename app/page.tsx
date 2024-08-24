@@ -99,12 +99,14 @@ export default function ExamSelector() {
 
   // @ts-ignore
   return (
-    <div className="flex flex-col mx-auto px-4 pt-6 pb-2 md:px-4 md:pt-6 md:pb-2 min-h-screen ">
+    <div
+      className="flex flex-col mx-auto px-4 pt-6 pb-2 md:px-4 md:pt-6 md:pb-2 bg-white dark:bg-gray-900 min-h-screen select-none">
       <Navbar
         userName={
           userSnapshot ? userSnapshot.linkedStudent.studentName : "xxx家长"
         }
         router={router}
+        snapshotMode={false}
       />
       <div className=" grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-6 md:pt-6">
         {examList.map((exam: any) => (

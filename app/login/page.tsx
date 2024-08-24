@@ -22,10 +22,8 @@ export default function Login() {
   const [role, setRole] = useState(loginRoleType.parent.toString());
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const [loginButtonContent, setLoginButtonContent] = useState("");
 
   useEffect(() => {
-    setLoginButtonContent(Math.random() < 0.4 ? "登录" : "Ciallo～(∠・ω< )");
     const token = localStorage.getItem("hfs_token");
     if (token) {
       fetchHFSApi(HFS_APIs.userSnapshot, {
@@ -136,13 +134,22 @@ export default function Login() {
               没有账号密码（微信登录）请先在手机端绑定手机号并设置密码
             </text>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex-col">
             <Button
               className="w-full"
               onClick={handleSubmit}
               disabled={isPending}
             >
-              {loginButtonContent}
+              立即登录
+            </Button>
+            <div className="py-2"/>
+            <Button
+              className="w-full bg-gray-500"
+              onClick={() => {
+                router.push("/snapshot");
+              }}
+            >
+              已有试卷快照？点我上传
             </Button>
           </CardFooter>
         </Card>
