@@ -8,39 +8,38 @@ import toast from "react-hot-toast";
 export default function LoadSnapshotPage() {
   const [examObject, setExamObject] = useState<ExamObject>();
   const [papersObject, setPapersObject] = useState<PapersObject>();
-  const [fileName, setFileName] = useState<string>();
 
   async function UploadSnapshot(e: ChangeEvent<HTMLInputElement>) {
     if (e.target.files?.length != 1) {
       toast.error("你还没上传文件！");
-      return;
+      return false;
     }
     let snapshotObject: { examObject: ExamObject, papersObject: PapersObject };
     if (e.target.files[0].type == "application/json") {
       snapshotObject = JSON.parse(await e.target.files[0].text());
       if (!snapshotObject.papersObject || !snapshotObject.examObject) {
         toast.error("你上传的文件中不存在papersObject/examObject，请检查是否上传正确！");
-        return;
+        return false;
       }
       setExamObject(snapshotObject.examObject);
       setPapersObject(snapshotObject.papersObject);
-      return;
+      return true;
     }
     const zip = await JSZip.loadAsync(e.target.files[0]);
     if (!zip.file("data.json")) {
       toast.error("你上传的压缩包不存在data.json文件，请检查是否上传正确！");
-      return;
+      return false;
     }
     const dataFile = await (zip.file("data.json") as JSZip.JSZipObject).async("string");
     snapshotObject = JSON.parse(dataFile);
     if (!snapshotObject.papersObject || !snapshotObject.examObject) {
       toast.error("data.json中不存在papersObject/examObject，请检查是否上传正确！");
-      return;
+      return false;
     }
     const imagesList = zip.folder("images");
     if (!imagesList) {
       toast.error("你上传的压缩包不存在images文件夹，请检查是否上传正确！");
-      return;
+      return false;
     }
     imagesList.forEach((relativePath, file) => {
       // 其实没必要做这步判断
@@ -49,7 +48,6 @@ export default function LoadSnapshotPage() {
         index = index.slice(0, index.length - 4);
         Object.keys(snapshotObject.papersObject).forEach((item) => {
           if (snapshotObject.papersObject[item].name == subjectName) {
-            console.log("进入处理分支：" + relativePath);
             if (!snapshotObject.papersObject[item].paperImages) {
               toast.error("科目：" + subjectName + " 的答题卡图片字段不存在！跳过处理");
               return;
@@ -64,6 +62,7 @@ export default function LoadSnapshotPage() {
     });
     setPapersObject(snapshotObject.papersObject);
     setExamObject(snapshotObject.examObject);
+    return true;
   }
 
   if (!examObject || !papersObject) {
@@ -76,7 +75,7 @@ export default function LoadSnapshotPage() {
             <path strokeLinecap="round" strokeLinejoin="round"
                   d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/>
           </svg>
-          {fileName || "上传你保存的快照文件（.zip / .json）"}
+          上传你保存的快照文件（.zip / .json）
           <input
             id="file-upload"
             name="file"
@@ -84,7 +83,17 @@ export default function LoadSnapshotPage() {
             accept="application/zip,application/json"
             className="sr-only"
             onChange={(e) => {
-              UploadSnapshot(e);
+              toast.promise(UploadSnapshot(e).then((value) => {
+                if (!value) {
+                  return Promise.reject();
+                } else {
+                  return Promise.resolve();
+                }
+              }), {
+                success: "解析完成！",
+                error: "解析失败！",
+                loading: "正在解析，请稍候~",
+              }).then();
             }}
           />
         </label>

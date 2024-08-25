@@ -237,7 +237,6 @@ export function PaperShowingComponent({paper, changeDisplayMode, advancedMode, r
           className="grid grid-flow-col gap-4"
         >
           {answerPictureUrls.map((url, index) => {
-            // eslint-disable-next-line @next/next/no-img-element
             return (
               <a key={index} href={url} target={"_blank"} rel="noreferrer">
                 <img

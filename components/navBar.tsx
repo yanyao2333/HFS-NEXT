@@ -1,3 +1,5 @@
+// noinspection SpellCheckingInspection
+
 "use client";
 
 import {AppRouterInstance} from "next/dist/shared/lib/app-router-context.shared-runtime";
@@ -11,14 +13,13 @@ const avatarB64 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4QAqRXhpZg
 
 export default function Navbar(props: { userName: string, router: AppRouterInstance, snapshotMode: boolean }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
   const handleClickOutside = (event: { target: any; }) => {
-    // @ts-ignore
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
       setDropdownOpen(false);
     }
@@ -40,40 +41,38 @@ export default function Navbar(props: { userName: string, router: AppRouterInsta
   return (
     <nav data-html2canvas-ignore="true"
          className="p-4 flex justify-between items-center rounded-lg shadow-sm border-gray-200 border">
-      <div className="text-white">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         {!props.snapshotMode ?
         <Link href={"/"}><img src={iconB64} alt="Icon" className="h-8 w-28"/></Link>
           : <a href={"/snapshot"}><img src={iconB64} alt="Icon" className="h-8 w-28"/></a>
         }
-      </div>
       <div className="relative" ref={dropdownRef}>
         <button onClick={toggleDropdown} className="focus:outline-none flex items-center space-x-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={avatarB64} alt="Avatar" className="h-8 w-8 rounded-full"/>
           <div
-            className="font-black text-gray-700 dark:text-gray-200 hover:dark:text-white hover:text-gray-900">
-            {props.snapshotMode ? props.userName : props.userName + " (点我!)"}
+            className={"flex gap-1 font-black text-black dark:text-gray-200 hover:dark:text-white hover:text-gray-900"}>
+            {props.userName}
+            <div className="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2}
+                   stroke="currentColor" className="size-[16px]">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3"/>
+              </svg>
+            </div>
           </div>
         </button>
-        {!props.snapshotMode ? (dropdownOpen && (
+        {dropdownOpen && (
           <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
-            <div className="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer" onClick={() => {
-              toast("查完成绩心情不好？我的建议是去玩一玩千恋万花，没别的意思，只是想让你看看芳乃有多可爱，白毛巫女赛高！", {
-                icon: "🥰",
-                duration: 5000,
-              });
-            }}>
-              tips: 这头像不是你的，只是想让你看看芳乃多可爱
-            </div>
+            {props.snapshotMode
+              ? (<Link className="block px-4 py-2 text-gray-800 hover:bg-gray-200" href={"/"}>试卷列表页</Link>)
+              : (
+                <Link className="block px-4 py-2 text-gray-800 hover:bg-gray-200" href={"/snapshot"}>试卷快照页</Link>)}
             <Link className="block px-4 py-2 text-gray-800 hover:bg-gray-200" href={"/settings"}>
-              设置
+              设置页
             </Link>
-            <div className="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer"
+            {!props.snapshotMode ? (<div className="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer"
                  onClick={handleLogout}>退出登录
-            </div>
+            </div>) : null}
           </div>
-        )) : null}
+        )}
       </div>
     </nav>
   )

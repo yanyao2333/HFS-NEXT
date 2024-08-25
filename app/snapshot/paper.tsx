@@ -161,9 +161,12 @@ export function PaperShowingComponent({paper, changeDisplayMode}: {
           className="grid grid-flow-col gap-4"
         >
           {paper.paperImages?.map((url, index) => {
+            // 如果快照文件中没有保存图片，就直接不显示（因为好分数用的对象存储图片链接有过期机制，大概率是显示不出来的，很难看）
+            if (!url.startsWith("data:image/jpeg;base64")) {
+              return null;
+            }
             return (
               <a key={index} href={url} target={"_blank"} rel="noreferrer">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   className="rounded-lg object-cover"
                   src={url}

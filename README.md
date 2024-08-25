@@ -12,28 +12,11 @@
 
 # 特性
 
-- [x] 登录页
-- [x] 试卷选择页
-- [x] 试卷详情页
 - [x] 分享试卷详情截图
-- [x] 看一些你想看的数据 (You know...)
+- [x] 看一些你想看的数据 (排名、最高分、平均分)
 - [x] 成绩分析图表（没用）
 - [x] 试卷快照保存（保存后可随时访问 /snapshot 上传查看）
 
 # 隐私声明
 
 HFS-NEXT 完全不会收集您的隐私信息，但会通过 Vercel Analytics 获取部分匿名统计数据（实际完全没人用就是了，纯自娱自乐）
-
-# 截图（不是最新的，建议直接登录体验）
-
-### 登录页
-
-![login.png](public/login.png)
-
-### 试卷列表页
-
-![exams_list.png](public/exams_list.png)
-
-### 试卷详情页
-
-![exam_detail.png](public/exam_detail.png)
