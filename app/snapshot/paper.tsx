@@ -93,7 +93,7 @@ export function PaperShowingComponent({paper, changeDisplayMode}: {
             </div>
             <div className="font-medium">
               {advancedMode
-                ? paper.rank?.defeatRatio.class + " (打败了全班" + paper.rank?.defeatRatio.class + "%的人)"
+                ? paper.rank?.rank.class + " (打败了全班" + paper.rank?.defeatRatio.class + "%的人)"
                 : paper.rank?.rankPart.class}
             </div>
           </div>
@@ -103,7 +103,7 @@ export function PaperShowingComponent({paper, changeDisplayMode}: {
             </div>
             <div className="font-medium">
               {advancedMode
-                ? paper.rank?.defeatRatio.grade +
+                ? paper.rank?.rank.grade +
                 " (打败了全年级" +
                 paper.rank?.defeatRatio.grade +
                 "%的人)"
