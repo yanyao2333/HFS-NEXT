@@ -2,6 +2,8 @@
 
 import {Card, CardContent, CardHeader} from "@/components/card";
 import {Paper} from "@/types/exam";
+import {Gallery, Item} from "react-photoswipe-gallery";
+import "photoswipe/dist/photoswipe.css";
 
 // 科目详情被隐藏时的样式
 export function PaperHidingComponent(props: {
@@ -155,33 +157,40 @@ export function PaperShowingComponent({paper, changeDisplayMode}: {
             </div>
           </div>
         </div>
-        <div
-          // b64图片，不存在防盗链问题，可以保存
-          // data-html2canvas-ignore="true"
-          className="grid grid-flow-col gap-4"
-        >
-          {paper.paperImages?.map((url, index) => {
-            // 如果快照文件中没有保存图片，就直接不显示（因为好分数用的对象存储图片链接有过期机制，大概率是显示不出来的，很难看）
-            if (!url.startsWith("data:image/jpeg;base64")) {
-              return null;
-            }
-            return (
-              <a key={index} href={url} target={"_blank"} rel="noreferrer">
-                <img
-                  className="rounded-lg object-cover"
-                  src={url}
-                  alt={paper.name + "_" + index}
-                  width={300}
-                  style={{
-                    aspectRatio: "300/200",
-                    objectFit: "cover",
-                  }}
-                  height={200}
-                />
-              </a>
-            );
-          })}
-        </div>
+        <Gallery withCaption withDownloadButton>
+          <div
+            className="grid grid-flow-col gap-4"
+          >
+            {paper.paperImages?.map((url, index) => {
+              // 如果快照文件中没有保存图片，就直接不显示（因为好分数用的对象存储图片链接有过期机制，大概率是显示不出来的，很难看）
+              if (!url.startsWith("data:image/jpeg;base64")) {
+                return null;
+              }
+              return (
+                <Item original={url}
+                      width="1024"
+                      height="768"
+                      key={index}
+                      caption={paper.name + " 第" + (index + 1) + "张"}
+                >
+                  {({ref, open}) => (
+                    <img ref={ref}
+                         onClick={open}
+                         className="rounded-lg object-cover cursor-pointer"
+                         src={url}
+                         alt={paper.name + "_" + index}
+                         width={300}
+                         style={{
+                           aspectRatio: "300/200",
+                           objectFit: "cover",
+                         }}
+                         height={200}/>
+                  )}
+                </Item>
+              );
+            })}
+          </div>
+        </Gallery>
       </CardContent>
     </Card>
   );
