@@ -51,6 +51,7 @@ export default function ExamSelector() {
   const [userSnapshot, setUserSnapshot] = useState<UserSnapshot>();
 
   useEffect(() => {
+    alert("Hey, 我是 Roitium，HFS-NEXT的开发者。很高兴告诉你：2024/10/17，好分数给所有会员相关的接口都加了鉴权，这意味着普通用户再也无法查看排名等信息了，这个项目也失去了它最大的意义。我很快就会把这个项目 Public Archive 掉，网站关不关闭随心情，祝你好运。以及：FUCK U HFS!!!!!!");
     const token = localStorage.getItem("hfs_token");
     if (!token) {
       setTimeout(() => {
