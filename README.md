@@ -4,6 +4,9 @@
 
 [![wakatime](https://wakatime.com/badge/github/yanyao2333/HFS-NEXT.svg)](https://wakatime.com/badge/github/yanyao2333/HFS-NEXT)
 
+> [!CAUTION]
+> 好分数于 2024/10/17 给所有会员接口加了鉴权，导致普通用户无法再查询排名等信息。该项目已没有维护意义。
+
 # 简介
 
 厌倦了包含着摇一摇开屏广告和各种vip提示的hfs？或许你可以试试这个~ \
