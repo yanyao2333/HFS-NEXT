@@ -1,16 +1,16 @@
 "use server";
-import {fillTemplate} from "@/utils/string";
+import { fillTemplate } from "@/utils/string";
 
 export async function fetchHFSApi(
   url: string,
   init: {
-    token: string,
-    method: "POST" | "GET",
+    token: string;
+    method: "POST" | "GET";
     // Post请求需要发送的json数据
-    postBody?: Object,
+    postBody?: Object;
     // Get请求需要的param，会预先解析并填充到url中
-    getParams?: Object
-  },
+    getParams?: Object;
+  }
 ): Promise<{ payload?: any; ok: boolean; errMsg?: string }> {
   try {
     const parsedUrl = fillTemplate(url, init.getParams);
@@ -28,16 +28,16 @@ export async function fetchHFSApi(
 
     const res = await fetch(parsedUrl, options);
     if (!res.ok) {
-      return {errMsg: res.statusText, ok: false};
+      return { errMsg: res.statusText, ok: false };
     }
 
     const json_data = await res.json();
     if (json_data["code"] === 0) {
-      return {payload: json_data["data"], ok: true};
+      return { payload: json_data["data"], ok: true };
     } else {
-      return {ok: false, errMsg: json_data["msg"]};
+      return { ok: false, errMsg: json_data["msg"] };
     }
   } catch (e) {
-    return {ok: false, errMsg: String(e)};
+    return { ok: false, errMsg: String(e) };
   }
 }

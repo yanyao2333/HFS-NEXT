@@ -1,29 +1,29 @@
 "use client";
 
-import {fetchHFSApi} from "@/app/actions";
-import {HFS_APIs} from "@/app/constants";
+import { fetchHFSApi } from "@/app/actions";
+import { HFS_APIs } from "@/app/constants";
 import Navbar from "@/components/navBar";
-import {GithubSVGIcon} from "@/components/svg";
-import {UserSnapshot} from "@/types/exam";
-import {formatTimestamp} from "@/utils/time";
-import {AppRouterInstance} from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { GithubSVGIcon } from "@/components/svg";
+import { UserSnapshot } from "@/types/exam";
+import { formatTimestamp } from "@/utils/time";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import Link from "next/link";
-import {useRouter} from "next/navigation";
-import {JSX, SVGProps, useEffect, useState} from "react";
+import { useRouter } from "next/navigation";
+import { JSX, SVGProps, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 // 卡片组件
 function ExamCard({
-                    name,
-                    score,
-                    released,
-                    examId,
-                  }: {
-  name: string,
-  score: number,
-  released: string,
-  examId: string,
-  router: AppRouterInstance,
+  name,
+  score,
+  released,
+  examId,
+}: {
+  name: string;
+  score: number;
+  released: string;
+  examId: string;
+  router: AppRouterInstance;
 }): JSX.Element {
   return (
     <Link
@@ -39,19 +39,20 @@ function ExamCard({
           </div>
           <div className="text-gray-500 text-sm">发布时间: {released}</div>
         </div>
-        <ArrowRightIcon className="h-5 w-5 text-gray-500"/>
+        <ArrowRightIcon className="h-5 w-5 text-gray-500" />
       </div>
     </Link>
   );
 }
 
 export default function ExamSelector() {
-  const [examList, setExams] = useState<{ name: any, score: string, released: string, examId: any }[]>([]);
+  const [examList, setExams] = useState<
+    { name: any; score: string; released: string; examId: any }[]
+  >([]);
   const router = useRouter();
   const [userSnapshot, setUserSnapshot] = useState<UserSnapshot>();
 
   useEffect(() => {
-    alert("Hey, 我是 Roitium，HFS-NEXT的开发者。很高兴告诉你：2024/10/17，好分数给所有会员相关的接口都加了鉴权，这意味着普通用户再也无法查看排名等信息了，这个项目也失去了它最大的意义。我很快就会把这个项目 Public Archive 掉，网站关不关闭随心情，祝你好运。以及：FUCK U HFS!!!!!!");
     const token = localStorage.getItem("hfs_token");
     if (!token) {
       setTimeout(() => {
@@ -101,8 +102,7 @@ export default function ExamSelector() {
 
   // @ts-ignore
   return (
-    <div
-      className="flex flex-col mx-auto px-4 pt-6 pb-2 md:px-4 md:pt-6 md:pb-2 bg-white dark:bg-gray-900 min-h-screen select-none">
+    <div className="flex flex-col mx-auto px-4 pt-6 pb-2 md:px-4 md:pt-6 md:pb-2 bg-white dark:bg-gray-900 min-h-screen select-none">
       <Navbar
         userName={
           userSnapshot ? userSnapshot.linkedStudent.studentName : "xxx家长"
@@ -127,7 +127,7 @@ export default function ExamSelector() {
                 target="_blank"
                 className="ml-1"
               >
-                <GithubSVGIcon/>
+                <GithubSVGIcon />
               </a>
               <a
                 href="https://github.com/yanyao2333/HFS-NEXT"
@@ -151,7 +151,7 @@ export default function ExamSelector() {
 }
 
 function ArrowRightIcon(
-  props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>,
+  props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>
 ) {
   return (
     <svg
@@ -166,8 +166,8 @@ function ArrowRightIcon(
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M5 12h14"/>
-      <path d="m12 5 7 7-7 7"/>
+      <path d="M5 12h14" />
+      <path d="m12 5 7 7-7 7" />
     </svg>
   );
 }

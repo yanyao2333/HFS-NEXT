@@ -9,7 +9,7 @@ export interface ExamObject {
   rank?: ExamRankInfo;
 }
 
-export type PapersObject = { [paperId: string]: Paper }
+export type PapersObject = { [paperId: string]: Paper };
 
 // 包含在试卷详情中的每科粗略信息
 export interface Paper {
@@ -39,8 +39,8 @@ export interface ExamDetail {
   classDefeatRatio: number;
   gradeDefeatRatio: number;
   papers: Paper[];
-  classRankPart: string;
-  gradeRankPart: string;
+  classRankS: string;
+  gradeRankS: string;
 }
 
 // 获取到的考试排名信息

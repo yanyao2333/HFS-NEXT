@@ -1,28 +1,91 @@
 "use client";
-import {fetchHFSApi} from "@/app/actions";
-import {HFS_APIs} from "@/app/constants";
-import {PaperHidingComponent, PaperShowingComponent} from "@/app/exam/[id]/paper";
+import { fetchHFSApi } from "@/app/actions";
+import { HFS_APIs } from "@/app/constants";
+import {
+  PaperHidingComponent,
+  PaperShowingComponent,
+} from "@/app/exam/[id]/paper";
 import Snapshot from "@/app/exam/[id]/snapshot";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/card";
 import Navbar from "@/components/navBar";
-import {GithubSVGIcon} from "@/components/svg";
-import {ExamObject, PapersObject, UserSnapshot} from "@/types/exam";
-import {formatTimestamp} from "@/utils/time";
-import {Chart as ChartJS, Filler, Legend, LineElement, PointElement, RadialLinearScale, Tooltip} from "chart.js";
+import { GithubSVGIcon } from "@/components/svg";
+import {
+  ExamObject,
+  ExamRankInfo,
+  PapersObject,
+  UserSnapshot,
+} from "@/types/exam";
+import { formatTimestamp } from "@/utils/time";
+import {
+  Chart as ChartJS,
+  Filler,
+  Legend,
+  LineElement,
+  PointElement,
+  RadialLinearScale,
+  Tooltip,
+} from "chart.js";
 import html2canvas from "html2canvas";
-import {useRouter} from "next/navigation";
-import {useCallback, useEffect, useRef, useState} from "react";
-import {Radar} from "react-chartjs-2";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Radar } from "react-chartjs-2";
 import toast from "react-hot-toast";
 
-export default function ExamPage({params}: { params: { id: string } }) {
+function RankInfoComponent({
+  rankInfo,
+}: {
+  rankInfo: ExamRankInfo | undefined;
+}) {
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            班级最高分
+          </div>
+          <div className="font-medium">
+            {rankInfo ? rankInfo.highest.class : "..."}
+          </div>
+        </div>
+        <div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            年级最高分
+          </div>
+          <div className="font-medium">
+            {rankInfo ? rankInfo.highest.grade : "..."}
+          </div>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            班级平均分
+          </div>
+          <div className="font-medium">
+            {rankInfo ? rankInfo.avg.class : "..."}
+          </div>
+        </div>
+        <div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            年级平均分
+          </div>
+          <div className="font-medium">
+            {rankInfo ? rankInfo.avg.grade : "..."}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default function ExamPage({ params }: { params: { id: string } }) {
   ChartJS.register(
     RadialLinearScale,
     PointElement,
     LineElement,
     Filler,
     Tooltip,
-    Legend,
+    Legend
   );
   const router = useRouter();
   const [advancedMode, setAdvancedMode] = useState<boolean>(false);
@@ -37,8 +100,9 @@ export default function ExamPage({params}: { params: { id: string } }) {
   const pageRef = useRef(null);
   const [papersObject, setPapersObject] = useState<PapersObject>();
 
-  const getExamObject = useCallback(async (token: string) => {
-      const [details, examRank, userSnapshot] = await Promise.allSettled([
+  const getExamObject = useCallback(
+    async (token: string) => {
+      const [details, examRank, userSnapshot] = (await Promise.allSettled([
         fetchHFSApi(HFS_APIs.examOverview, {
           token: token,
           method: "GET",
@@ -57,14 +121,22 @@ export default function ExamPage({params}: { params: { id: string } }) {
           token: token,
           method: "GET",
         }),
-      ]) as unknown as PromiseFulfilledResult<{ payload?: any, ok: boolean, errMsg?: string | undefined }>[]; // 我们在fetch中做了错误捕捉，所以不会为rejected
+      ])) as unknown as PromiseFulfilledResult<{
+        payload?: any;
+        ok: boolean;
+        errMsg?: string | undefined;
+      }>[]; // 我们在fetch中做了错误捕捉，所以不会为rejected
       if (details.value.ok) {
         setRadarChartData({
-          labels: details.value.payload.papers.map((item: { name: string }) => item.name),
+          labels: details.value.payload.papers.map(
+            (item: { name: string }) => item.name
+          ),
           datasets: [
             {
               label: "你的得分",
-              data: details.value.payload.papers.map((item: { score: number }) => item.score),
+              data: details.value.payload.papers.map(
+                (item: { score: number }) => item.score
+              ),
               fill: true,
               backgroundColor: "rgba(255, 99, 132, 0.2)",
               borderColor: "rgb(255, 99, 132)",
@@ -76,7 +148,7 @@ export default function ExamPage({params}: { params: { id: string } }) {
             {
               label: "满分",
               data: details.value.payload.papers.map(
-                (item: { manfen: number }) => item.manfen,
+                (item: { manfen: number }) => item.manfen
               ),
               fill: true,
               backgroundColor: "rgba(54, 162, 235, 0.2)",
@@ -93,10 +165,12 @@ export default function ExamPage({params}: { params: { id: string } }) {
           detail: details.value.payload,
         }));
       } else {
-        toast.error("调用好分数API失败：" + details.value.errMsg);
+        toast.error("调用好分数API「考试详情」失败：" + details.value.errMsg);
       }
-      if (!examRank.value.ok) {
-        toast.error("调用好分数API失败：" + examRank.value.errMsg);
+      if (!examRank.value.ok && advancedMode) {
+        toast.error(
+          "调用好分数API「考试排名信息」失败：" + examRank.value.errMsg
+        );
       }
       setExamObject((prevExamObject) => ({
         ...prevExamObject,
@@ -105,9 +179,13 @@ export default function ExamPage({params}: { params: { id: string } }) {
       if (!userSnapshot.value.ok) {
         toast.error("调用好分数API失败：" + userSnapshot.value.errMsg);
       }
+      // 根据是否是会员决定是否开启高级模式
+      if (userSnapshot.value.payload.isMember) {
+        setAdvancedMode(true);
+      }
       setUserSnapshot(userSnapshot.value.payload);
     },
-    [params.id],
+    [advancedMode, params.id]
   );
 
   useEffect(() => {
@@ -118,10 +196,10 @@ export default function ExamPage({params}: { params: { id: string } }) {
       return;
     }
     getExamObject(token).then();
-    const localAdvancedMode = localStorage.getItem("advancedMode");
-    if (localAdvancedMode) {
-      setAdvancedMode("1" === localAdvancedMode);
-    }
+    // const localAdvancedMode = localStorage.getItem("advancedMode");
+    // if (localAdvancedMode) {
+    //   setAdvancedMode("1" === localAdvancedMode);
+    // }
   }, [getExamObject, params.id, router]);
 
   function changeDisplayedMode(paperId: string) {
@@ -201,7 +279,7 @@ export default function ExamPage({params}: { params: { id: string } }) {
                       success: (
                         <span>
                           成功创建并下载截图！
-                          <br/>
+                          <br />
                           (答题卡图片空白是正常的)
                         </span>
                       ),
@@ -214,7 +292,7 @@ export default function ExamPage({params}: { params: { id: string } }) {
                       success: {
                         duration: 5000,
                       },
-                    },
+                    }
                   );
                 }}
                 className="cursor-pointer flex-grow-0 border border-gray-400 rounded-full p-1 hover:bg-gray-200"
@@ -227,8 +305,11 @@ export default function ExamPage({params}: { params: { id: string } }) {
                   stroke="currentColor"
                   className="size-5"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round"
-                        d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                  />
                 </svg>
               </div>
             </div>
@@ -276,92 +357,43 @@ export default function ExamPage({params}: { params: { id: string } }) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">
-                  班级排名/等第
+                  {advancedMode ? "班级排名/等第" : "班级排名"}
                 </div>
                 <div className="font-medium">
                   {examObject?.detail
                     ? advancedMode
                       ? examObject.detail.classRank +
-                      " (打败了全班" +
-                      examObject.detail.classDefeatRatio +
-                      "%的人)"
-                      : examObject.detail.classRankPart
+                        " (打败了全班" +
+                        examObject.detail.classDefeatRatio +
+                        "%的人)"
+                      : examObject.detail.classRankS
                     : "..."}
                 </div>
               </div>
+            </div>
+            {advancedMode && (
               <div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">
-                  年级排名/等第
+                  {advancedMode ? "年级排名/等第" : "年级排名"}
                 </div>
                 <div className="font-medium">
                   {examObject?.detail
                     ? advancedMode
                       ? examObject.detail.gradeRank +
-                      " (打败了全年级" +
-                      examObject.detail.gradeDefeatRatio +
-                      "%的人)"
-                      : examObject.detail.gradeRankPart
+                        " (打败了全年级" +
+                        examObject.detail.gradeDefeatRatio +
+                        "%的人)"
+                      : examObject.detail.gradeRankS
                     : "..."}
                 </div>
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  班级最高分
-                </div>
-                <div className="font-medium">
-                  {examObject?.rank
-                    ? advancedMode
-                      ? examObject.rank.highest.class
-                      : "根据要求，该数据不允许展示"
-                    : "..."}
-                </div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  年级最高分
-                </div>
-                <div className="font-medium">
-                  {examObject?.rank
-                    ? advancedMode
-                      ? examObject.rank.highest.grade
-                      : "根据要求，该数据不允许展示"
-                    : "..."}
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  班级平均分
-                </div>
-                <div className="font-medium">
-                  {examObject?.rank
-                    ? advancedMode
-                      ? examObject.rank.avg.class
-                      : "根据要求，该数据不允许展示"
-                    : "..."}
-                </div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  年级平均分
-                </div>
-                <div className="font-medium">
-                  {examObject?.rank
-                    ? advancedMode
-                      ? examObject.rank.avg.grade
-                      : "根据要求，该数据不允许展示"
-                    : "..."}
-                </div>
-              </div>
-            </div>
+            )}
+            {advancedMode && <RankInfoComponent rankInfo={examObject?.rank} />}
             <div className="h-80 w-80 justify-self-center">
               {radarChartData ? (
-                <Radar data={radarChartData} datasetIdKey="radar"/>
+                <Radar data={radarChartData} datasetIdKey="radar" />
               ) : (
-                <div/>
+                <div />
               )}
             </div>
             {/* 快照弹窗 */}
@@ -386,23 +418,23 @@ export default function ExamPage({params}: { params: { id: string } }) {
                 let component;
                 !displayedPapersMode[item.paperId]
                   ? (component = (
-                    <PaperHidingComponent
-                      paper={item}
-                      changeDisplayMode={changeDisplayedMode}
-                      key={item.paperId}
-                    />
-                  ))
+                      <PaperHidingComponent
+                        paper={item}
+                        changeDisplayMode={changeDisplayedMode}
+                        key={item.paperId}
+                      />
+                    ))
                   : (component = (
-                    <PaperShowingComponent
-                      paper={item}
-                      changeDisplayMode={changeDisplayedMode}
-                      advancedMode={advancedMode}
-                      router={router}
-                      examId={String(examObject?.detail?.examId)}
-                      setPapersObject={setPapersObject}
-                      key={item.paperId}
-                    />
-                  ));
+                      <PaperShowingComponent
+                        paper={item}
+                        changeDisplayMode={changeDisplayedMode}
+                        advancedMode={advancedMode}
+                        router={router}
+                        examId={String(examObject?.detail?.examId)}
+                        setPapersObject={setPapersObject}
+                        key={item.paperId}
+                      />
+                    ));
                 return component;
               })}
             </div>
@@ -420,7 +452,7 @@ export default function ExamPage({params}: { params: { id: string } }) {
                 target="_blank"
                 className="ml-1"
               >
-                <GithubSVGIcon/>
+                <GithubSVGIcon />
               </a>
               <a
                 href="https://github.com/yanyao2333/HFS-NEXT"
