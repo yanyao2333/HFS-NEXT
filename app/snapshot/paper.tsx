@@ -8,7 +8,7 @@ import 'photoswipe/dist/photoswipe.css'
 // 科目详情被隐藏时的样式
 export function PaperHidingComponent(props: {
   paper: Paper
-  changeDisplayMode: Function
+  changeDisplayMode: (paperId: string) => void
 }) {
   return (
     <Card>
@@ -48,7 +48,7 @@ export function PaperShowingComponent({
   changeDisplayMode,
 }: {
   paper: Paper
-  changeDisplayMode: Function
+  changeDisplayMode: (paperId: string) => void
 }) {
   const advancedMode = true
 
@@ -172,7 +172,7 @@ export function PaperShowingComponent({
                   original={url}
                   width='1024'
                   height='768'
-                  key={index}
+                  key={url}
                   caption={`${paper.name} 第${index + 1}张`}
                 >
                   {({ ref, open }) => (

@@ -7,10 +7,12 @@ export async function fetchHFSApi(
     token: string
     method: 'POST' | 'GET'
     // Post请求需要发送的json数据
-    postBody?: Object
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    postBody?: Record<string, any>
     // Get请求需要的param，会预先解析并填充到url中
-    getParams?: Object
+    getParams?: Record<string, string | number>
   },
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 ): Promise<{ payload?: any; ok: boolean; errMsg?: string }> {
   try {
     const parsedUrl = fillTemplate(url, init.getParams)

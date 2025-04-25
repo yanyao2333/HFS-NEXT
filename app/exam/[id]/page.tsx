@@ -28,7 +28,6 @@ import {
 import html2canvas from 'html2canvas'
 import { useRouter } from 'next/navigation'
 import { use, useCallback, useEffect, useRef, useState } from 'react'
-import { Radar } from 'react-chartjs-2'
 import toast from 'react-hot-toast'
 
 function RankInfoComponent({
@@ -97,7 +96,6 @@ export default function ExamPage(props: { params: Promise<{ id: string }> }) {
   const [userSnapshot, setUserSnapshot] = useState<UserSnapshot>()
   const [isExamSnapshotWindowOpen, setIsExamSnapshotWindowOpen] =
     useState(false)
-  const [radarChartData, setRadarChartData] = useState<any>()
   const pageRef = useRef(null)
   const [papersObject, setPapersObject] = useState<PapersObject>()
 
@@ -123,44 +121,12 @@ export default function ExamPage(props: { params: Promise<{ id: string }> }) {
           method: 'GET',
         }),
       ])) as unknown as PromiseFulfilledResult<{
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         payload?: any
         ok: boolean
         errMsg?: string | undefined
       }>[] // 我们在fetch中做了错误捕捉，所以不会为rejected
       if (details.value.ok) {
-        setRadarChartData({
-          labels: details.value.payload.papers.map(
-            (item: { name: string }) => item.name,
-          ),
-          datasets: [
-            {
-              label: '你的得分',
-              data: details.value.payload.papers.map(
-                (item: { score: number }) => item.score,
-              ),
-              fill: true,
-              backgroundColor: 'rgba(255, 99, 132, 0.2)',
-              borderColor: 'rgb(255, 99, 132)',
-              pointBackgroundColor: 'rgb(255, 99, 132)',
-              pointBorderColor: '#fff',
-              pointHoverBackgroundColor: '#fff',
-              pointHoverBorderColor: 'rgb(255, 99, 132)',
-            },
-            {
-              label: '满分',
-              data: details.value.payload.papers.map(
-                (item: { manfen: number }) => item.manfen,
-              ),
-              fill: true,
-              backgroundColor: 'rgba(54, 162, 235, 0.2)',
-              borderColor: 'rgb(54, 162, 235)',
-              pointBackgroundColor: 'rgb(54, 162, 235)',
-              pointBorderColor: '#fff',
-              pointHoverBackgroundColor: '#fff',
-              pointHoverBorderColor: 'rgb(54, 162, 235)',
-            },
-          ],
-        })
         setExamObject((prevExamObject) => ({
           ...prevExamObject,
           detail: details.value.payload,
@@ -201,7 +167,7 @@ export default function ExamPage(props: { params: Promise<{ id: string }> }) {
     // if (localAdvancedMode) {
     //   setAdvancedMode("1" === localAdvancedMode);
     // }
-  }, [getExamObject, params.id, router])
+  }, [getExamObject, router])
 
   function changeDisplayedMode(paperId: string) {
     setDisplayedPapersMode((prevState) => {
@@ -249,7 +215,6 @@ export default function ExamPage(props: { params: Promise<{ id: string }> }) {
               data-html2canvas-ignore='true'
               className='flex flex-row gap-3 pt-3'
             >
-              {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
               <div
                 onClick={() => {
                   setIsExamSnapshotWindowOpen(true)
@@ -272,7 +237,6 @@ export default function ExamPage(props: { params: Promise<{ id: string }> }) {
                   />
                 </svg>
               </div>
-              {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
               <div
                 onClick={() => {
                   toast.promise(
@@ -287,7 +251,7 @@ export default function ExamPage(props: { params: Promise<{ id: string }> }) {
                           (答题卡图片空白是正常的)
                         </span>
                       ),
-                      error: (err) => `创建截图失败，原因：${err}`,
+                      error: (err: string) => `创建截图失败，原因：${err}`,
                     },
                     {
                       error: {
@@ -388,16 +352,6 @@ export default function ExamPage(props: { params: Promise<{ id: string }> }) {
               </div>
             )}
             {advancedMode && <RankInfoComponent rankInfo={examObject?.rank} />}
-            <div className='h-80 w-80 justify-self-center'>
-              {radarChartData ? (
-                <Radar
-                  data={radarChartData}
-                  datasetIdKey='radar'
-                />
-              ) : (
-                <div />
-              )}
-            </div>
             {/* 快照弹窗 */}
             {isExamSnapshotWindowOpen && (
               <Snapshot

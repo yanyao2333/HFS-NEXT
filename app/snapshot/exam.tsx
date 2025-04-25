@@ -19,8 +19,7 @@ import {
 } from 'chart.js'
 import html2canvas from 'html2canvas'
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
-import { Radar } from 'react-chartjs-2'
+import { useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 
 export function ExamPage({
@@ -39,45 +38,8 @@ export function ExamPage({
   const [displayedPapersMode, setDisplayedPapersMode] = useState<{
     [index: string]: boolean
   }>({}) // true为显示 false为隐藏
-  const [radarChartData, setRadarChartData] = useState<any>()
   const pageRef = useRef(null)
   const advancedMode = true
-
-  useEffect(() => {
-    setRadarChartData({
-      labels: examObject.detail?.papers.map(
-        (item: { name: string }) => item.name,
-      ),
-      datasets: [
-        {
-          label: '你的得分',
-          data: examObject.detail?.papers.map(
-            (item: { score: number }) => item.score,
-          ),
-          fill: true,
-          backgroundColor: 'rgba(255, 99, 132, 0.2)',
-          borderColor: 'rgb(255, 99, 132)',
-          pointBackgroundColor: 'rgb(255, 99, 132)',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: 'rgb(255, 99, 132)',
-        },
-        {
-          label: '满分',
-          data: examObject.detail?.papers.map(
-            (item: { manfen: number }) => item.manfen,
-          ),
-          fill: true,
-          backgroundColor: 'rgba(54, 162, 235, 0.2)',
-          borderColor: 'rgb(54, 162, 235)',
-          pointBackgroundColor: 'rgb(54, 162, 235)',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: 'rgb(54, 162, 235)',
-        },
-      ],
-    })
-  }, [examObject.detail?.papers])
 
   function changeDisplayedMode(paperId: string) {
     setDisplayedPapersMode((prevState) => {
@@ -128,7 +90,7 @@ export function ExamPage({
                     {
                       loading: '正在截图',
                       success: '成功创建并下载截图！',
-                      error: (err) => `创建截图失败，原因：${err}`,
+                      error: (err: string) => `创建截图失败，原因：${err}`,
                     },
                     {
                       error: {
@@ -277,16 +239,6 @@ export function ExamPage({
                 </div>
               </div>
             </div>
-            <div className='h-80 w-80 justify-self-center'>
-              {radarChartData ? (
-                <Radar
-                  data={radarChartData}
-                  datasetIdKey='radar'
-                />
-              ) : (
-                <div />
-              )}
-            </div>
           </CardContent>
         </Card>
         <Card>
@@ -295,24 +247,24 @@ export function ExamPage({
           </CardHeader>
           <CardContent>
             <div className='grid gap-4'>
-              {Object.keys(papersObject).map((paperId) => {
-                let component
-                !displayedPapersMode[paperId]
-                  ? (component = (
-                      <PaperHidingComponent
-                        paper={papersObject[paperId]}
-                        changeDisplayMode={changeDisplayedMode}
-                        key={paperId}
-                      />
-                    ))
-                  : (component = (
-                      <PaperShowingComponent
-                        paper={papersObject[paperId]}
-                        changeDisplayMode={changeDisplayedMode}
-                        key={paperId}
-                      />
-                    ))
-                return component
+              {examObject?.detail?.papers?.map((item) => {
+                const isDisplayed = displayedPapersMode[item.paperId]
+
+                const commonProps = {
+                  paper: item,
+                  changeDisplayMode: changeDisplayedMode,
+                }
+                return isDisplayed ? (
+                  <PaperShowingComponent
+                    {...commonProps}
+                    key={item.paperId}
+                  />
+                ) : (
+                  <PaperHidingComponent
+                    {...commonProps}
+                    key={item.paperId}
+                  />
+                )
               })}
             </div>
           </CardContent>

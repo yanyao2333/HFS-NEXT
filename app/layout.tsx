@@ -1,9 +1,11 @@
 import './globals.css'
 import { Toaster } from 'react-hot-toast'
 
-export default function RootLayout({ children }) {
+export default function RootLayout({
+  children,
+}: { children: React.ReactNode }) {
   return (
-    <html>
+    <html lang='zh-CN'>
       <head>
         <link
           rel='icon'

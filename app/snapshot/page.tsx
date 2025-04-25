@@ -52,6 +52,7 @@ export default function LoadSnapshotPage() {
       if (relativePath.endsWith('.jpg')) {
         let [subjectName, index] = relativePath.split('_')
         index = index.slice(0, index.length - 4)
+        // biome-ignore lint/complexity/noForEach: <explanation>
         Object.keys(snapshotObject.papersObject).forEach((item) => {
           if (snapshotObject.papersObject[item].name === subjectName) {
             if (!snapshotObject.papersObject[item].paperImages) {
@@ -61,10 +62,10 @@ export default function LoadSnapshotPage() {
               return
             }
             file.async('base64').then((imageB64) => {
-              imageB64 = `data:image/jpeg;base64,${imageB64}`
+              const prefixedB64 = `data:image/jpeg;base64,${imageB64}`
               ;(snapshotObject.papersObject[item].paperImages as string[])[
                 Number(index)
-              ] = imageB64
+              ] = prefixedB64
             })
           }
         })

@@ -38,6 +38,8 @@ export interface ExamDetail {
   gradeRank: number
   classDefeatRatio: number
   gradeDefeatRatio: number
+  classRankPart: string
+  gradeRankPart: string
   papers: Paper[]
   classRankS: string
   gradeRankS: string

@@ -13,7 +13,7 @@ import 'photoswipe/dist/photoswipe.css'
 // 科目详情被隐藏时的样式
 export function PaperHidingComponent(props: {
   paper: Paper
-  changeDisplayMode: Function
+  changeDisplayMode: (paperId: string) => void
 }) {
   return (
     <Card>
@@ -57,11 +57,12 @@ export function PaperShowingComponent({
   setPapersObject,
 }: {
   paper: Paper
-  changeDisplayMode: Function
+  changeDisplayMode: (paperId: string) => void
   advancedMode: boolean
   router: AppRouterInstance
   examId: string
-  setPapersObject: Function
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  setPapersObject: (papersObject: any) => void
 }) {
   const [paperRankInfo, setPaperRankInfo] = useState<PaperRankInfo>()
   const [answerPictureUrls, setAnswerPictureUrls] = useState<string[]>([])
@@ -86,6 +87,7 @@ export function PaperShowingComponent({
           },
         }),
       ])) as unknown as PromiseFulfilledResult<{
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         payload?: any
         ok: boolean
         errMsg?: string | undefined
@@ -101,6 +103,7 @@ export function PaperShowingComponent({
       setAnswerPictureUrls(
         answerPicture.value.payload ? answerPicture.value.payload.url : [],
       )
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       setPapersObject((prevObject: any) => {
         const updatedPaper = {
           ...paper,
@@ -262,7 +265,7 @@ export function PaperShowingComponent({
                   original={url}
                   width='1024'
                   height='768'
-                  key={index}
+                  key={url}
                   caption={`${paper.name} 第${index + 1}张`}
                 >
                   {({ ref, open }) => (

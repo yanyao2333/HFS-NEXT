@@ -20,7 +20,7 @@ function ExamCard({
   examId,
 }: {
   name: string
-  score: number
+  score: string
   released: string
   examId: string
   router: AppRouterInstance
@@ -47,7 +47,7 @@ function ExamCard({
 
 export default function ExamSelector() {
   const [examList, setExams] = useState<
-    { name: any; score: string; released: string; examId: any }[]
+    { name: string; score: string; released: string; examId: string }[]
   >([])
   const router = useRouter()
   const [userSnapshot, setUserSnapshot] = useState<UserSnapshot>()
@@ -100,7 +100,6 @@ export default function ExamSelector() {
     })
   }, [router])
 
-  // @ts-ignore
   return (
     <div className='mx-auto flex min-h-screen select-none flex-col bg-white px-4 pt-6 pb-2 md:px-4 md:pt-6 md:pb-2 dark:bg-gray-900'>
       <Navbar
@@ -111,19 +110,25 @@ export default function ExamSelector() {
         snapshotMode={false}
       />
       <div className=' grid gap-6 pt-6 md:grid-cols-2 md:pt-6 lg:grid-cols-3 xl:grid-cols-4'>
-        {examList.map((exam: any) => (
-          <ExamCard
-            key={exam.key}
-            {...exam}
-          />
-        ))}
+        {examList.map((exam) => {
+          return (
+            <ExamCard
+              key={exam.examId}
+              name={exam.name}
+              score={exam.score}
+              released={exam.released}
+              examId={exam.examId}
+              router={router}
+            />
+          )
+        })}
       </div>
       <div className='flex-grow' />
       <div className='divide-y pt-10'>
         <div />
         <div className='flex flex-col justify-between pt-0.5 md:flex-row'>
           <span className='flex items-center text-gray-500 text-xs'>
-            Open Source by UselessLab on
+            Open Source by Roitium on
             <span className='ml-1 inline-flex items-center'>
               <a
                 href='https://github.com/yanyao2333/HFS-NEXT'

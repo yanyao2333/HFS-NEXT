@@ -117,9 +117,7 @@ export default function Login() {
             </div>
             <div className='space-y-2'>
               <Label htmlFor='mode'>登录方式</Label>
-              {/*@ts-ignore*/}
               <Select
-                id='mode'
                 value={role}
                 onValueChange={setRole}
               >

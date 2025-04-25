@@ -9,7 +9,7 @@ export default function Snapshot({
   examObject,
   papersObject,
 }: {
-  onClose: any
+  onClose: () => void
   examObject: ExamObject | undefined
   papersObject: PapersObject | undefined
 }) {

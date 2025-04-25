@@ -2,5 +2,8 @@
   "go.goroot": "/home/roitium/.local/share/mise/installs/go/1.24.2",
   "debug.javascript.defaultRuntimeExecutable": {
     "pwa-node": "/home/roitium/.local/share/mise/shims/node"
+  },
+  "go.alternateTools": {
+    "go": "/home/roitium/.local/share/mise/shims/go"
   }
 }
