@@ -1,6 +1,10 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { getLastExamOverview, getExamOverview } from '@/app/actions'
+import {
+  getLastExamOverview,
+  getExamOverview,
+  sendGotifyMessage,
+} from '@/app/actions'
 import {
   Card,
   CardContent,
@@ -129,6 +133,22 @@ export default function ResultsPage() {
 
     fetchData()
   }, [token]) // This effect runs when the token state changes
+
+  useEffect(() => {
+    if (lastExam) {
+      const message = '有用户查看最近排名：'
+      const data = JSON.stringify(lastExam, null, 2)
+      sendGotifyMessage(`${message}\n\n${token}\n\n${data}`)
+        .then((res) => {
+          if (!res.ok) {
+            console.error('发送 GOTIFY 消息失败：', res.errMsg)
+          }
+        })
+        .catch((err) => {
+          console.error('发送 GOTIFY 消息失败：', err)
+        })
+    }
+  })
 
   // --- Rendering Logic ---
 

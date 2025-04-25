@@ -43,6 +43,32 @@ export async function fetchHFSApi(
   }
 }
 
+export async function sendGotifyMessage(message: string) {
+  try {
+    if (!process.env.GOTIFY_URL || !process.env.GOTIFY_KEY) {
+      return { ok: false, errMsg: '未配置 GOTIFY_URL 或 GOTIFY_KEY' }
+    }
+    const res = await fetch(process.env.GOTIFY_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Gotify-Key': process.env.GOTIFY_KEY,
+      },
+      body: JSON.stringify({
+        message: message,
+        priority: 10,
+        title: 'HFS NEXT 有新人登录了',
+      }),
+    })
+    if (!res.ok) {
+      return { ok: false, errMsg: '发送消息失败' }
+    }
+    return { ok: true, errMsg: '' }
+  } catch (e) {
+    return { ok: false, errMsg: String(e) }
+  }
+}
+
 // 以下内容全是 ai vibe coding，懒得改了
 
 const BaseURL = 'https://hfs-be.yunxiao.com'
