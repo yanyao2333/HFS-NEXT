@@ -109,6 +109,22 @@ export default function ExamSelector() {
         router={router}
         snapshotMode={false}
       />
+      <div className='mt-3 max-w-[600px] self-center rounded-lg bg-sky-400 px-4 py-3 font-medium text-white shadow-md'>
+        <div className='flex flex-wrap items-center justify-between'>
+          <div className='mr-5 flex flex-1 items-center truncate font-medium'>
+            <span className=''>点我查看最新考试排名！</span>
+          </div>
+
+          <div className='order-3 mt-2 w-full flex-shrink-0 sm:order-2 sm:mt-0 sm:w-auto'>
+            <Link
+              href='/results'
+              className='flex items-center justify-center rounded-md border border-transparent bg-white px-4 py-2 font-medium text-black text-sm shadow-sm hover:bg-gray-100'
+            >
+              点我
+            </Link>
+          </div>
+        </div>
+      </div>
       <div className=' grid gap-6 pt-6 md:grid-cols-2 md:pt-6 lg:grid-cols-3 xl:grid-cols-4'>
         {examList.map((exam) => {
           return (
