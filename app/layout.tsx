@@ -1,6 +1,4 @@
 import "./globals.css";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "react-hot-toast";
 
 export default function RootLayout({ children }) {
@@ -23,8 +21,6 @@ export default function RootLayout({ children }) {
 			</head>
 			<body>
 				{children}
-				<Analytics />
-				<SpeedInsights />
 				<Toaster />
 			</body>
 		</html>

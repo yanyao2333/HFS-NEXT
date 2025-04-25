@@ -173,6 +173,7 @@ function ArrowRightIcon(
 			strokeLinecap="round"
 			strokeLinejoin="round"
 		>
+			<title>向右箭头</title>
 			<path d="M5 12h14" />
 			<path d="m12 5 7 7-7 7" />
 		</svg>
