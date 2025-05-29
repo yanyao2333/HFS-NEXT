@@ -1,5 +1,22 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://next.biomejs.dev/schemas/2.0.0-beta/schema.json",
+  "files": {
+    "ignoreUnknown": false,
+    "includes": [
+      "**",
+      "!**/src/components/ui/*.tsx",
+      "!**/node_modules",
+      "!**/.next",
+      "!**/.contentlayer",
+      "!**/coverage",
+      "!**/public",
+      "!**/src/css/LXGWWenKai-Regular/*",
+      "!**/.million",
+      "!**/.aider*",
+      "!**/temp",
+      "!**/.content-collections"
+    ]
+  },
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -8,11 +25,30 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
-      "suspicious": {
-        "noDebugger": "off"
+      "style": {
+        "useLiteralEnumMembers": "error",
+        "noCommaOperator": "error",
+        "useNodejsImportProtocol": "error",
+        "useAsConstAssertion": "error",
+        "useNumericLiterals": "error",
+        "useEnumInitializers": "error",
+        "useSelfClosingElements": "error",
+        "useConst": "error",
+        "useSingleVarDeclarator": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useNumberNamespace": "error",
+        "noInferrableTypes": "error",
+        "useExponentiationOperator": "error",
+        "useTemplate": "error",
+        "noParameterAssign": "error",
+        "noNonNullAssertion": "error",
+        "useDefaultParameterLast": "error",
+        "noArguments": "error",
+        "useImportType": "error",
+        "useExportType": "error",
+        "noUselessElse": "error",
+        "useShorthandFunctionType": "error"
       },
-      "style": {},
       "a11y": {
         "useSemanticElements": "off",
         "useKeyWithClickEvents": "off",
@@ -30,10 +66,15 @@
             "attributes": ["className"],
             "functions": ["clsx", "cva", "cn"]
           }
-        }
+        },
+        "noImgElement": "off",
+        "noFloatingPromises": "error"
       },
       "complexity": {
         "noForEach": "warn"
+      },
+      "suspicious": {
+        "noDebugger": "off"
       }
     }
   },
@@ -47,8 +88,12 @@
     "attributePosition": "auto",
     "useEditorconfig": false
   },
-  "organizeImports": {
-    "enabled": true
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
   },
   "javascript": {
     "formatter": {
