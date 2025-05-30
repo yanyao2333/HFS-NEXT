@@ -67,10 +67,10 @@ export default function ExamSelector() {
             <span className=''>点我查看最新考试排名！</span>
           </div>
 
-          <div className='order-3 mt-2 w-full flex-shrink-0 sm:order-2 sm:mt-0 sm:w-auto'>
+          <div className='order-3 mt-2 w-full shrink-0 sm:order-2 sm:mt-0 sm:w-auto'>
             <Link
               href='/results'
-              className='flex items-center justify-center rounded-md border border-transparent bg-white px-4 py-2 font-medium text-black text-sm shadow-sm hover:bg-gray-100'
+              className='flex items-center justify-center rounded-md border border-transparent bg-white px-4 py-2 font-medium text-black text-sm shadow-xs hover:bg-gray-100'
             >
               点我
             </Link>
@@ -91,7 +91,7 @@ export default function ExamSelector() {
           )
         })}
       </div>
-      <div className='flex-grow' />
+      <div className='grow' />
       <div className='divide-y pt-10'>
         <div />
         <div className='flex flex-col justify-between pt-0.5 md:flex-row'>

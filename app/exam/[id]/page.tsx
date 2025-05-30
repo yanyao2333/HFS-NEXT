@@ -152,7 +152,7 @@ export default function ExamPage(props: { params: Promise<{ id: string }> }) {
               data-html2canvas-ignore='true'
               className='flex flex-row gap-3 pt-3'
             >
-              <div className='flex-grow-0 cursor-pointer rounded-full border border-gray-400 p-1 hover:bg-gray-200'>
+              <div className='grow-0 cursor-pointer rounded-full border border-gray-400 p-1 hover:bg-gray-200'>
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
                   fill='none'
@@ -194,7 +194,7 @@ export default function ExamPage(props: { params: Promise<{ id: string }> }) {
                     },
                   )
                 }}
-                className='flex-grow-0 cursor-pointer rounded-full border border-gray-400 p-1 hover:bg-gray-200'
+                className='grow-0 cursor-pointer rounded-full border border-gray-400 p-1 hover:bg-gray-200'
               >
                 <svg
                   xmlns='http://www.w3.org/2000/svg'

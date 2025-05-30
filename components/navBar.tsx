@@ -40,7 +40,7 @@ export default function Navbar() {
   return (
     <nav
       data-html2canvas-ignore='true'
-      className='flex items-center justify-between rounded-lg border border-gray-200 p-4 shadow-sm'
+      className='flex items-center justify-between rounded-lg border border-gray-200 p-4 shadow-xs'
     >
       <Link href={'/'}>
         <img
@@ -55,11 +55,11 @@ export default function Navbar() {
       >
         <button
           onClick={toggleDropdown}
-          className='flex items-center space-x-2 focus:outline-none'
+          className='flex items-center space-x-2 focus:outline-hidden'
         >
           <div
             className={
-              'flex gap-1 font-black text-black hover:text-gray-900 dark:text-gray-200 hover:dark:text-white'
+              'flex gap-1 font-black text-black hover:text-gray-900 dark:text-gray-200 dark:hover:text-white'
             }
           >
             {userSnapshot ? userSnapshot.linkedStudent.studentName : '？？？'}
