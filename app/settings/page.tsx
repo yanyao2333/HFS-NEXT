@@ -28,9 +28,9 @@ export default function SwitchAdvancedMode() {
         </span>
         当前AdvancedMode状态为：
         {advancedMode ? (
-          <span style={{ color: 'green' }}>已开启</span>
+          <span className='text-green-500'>已开启</span>
         ) : (
-          <span style={{ color: 'red' }}>未开启</span>
+          <span className='text-red-500'>未开启</span>
         )}
       </p>
       <br />

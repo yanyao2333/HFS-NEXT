@@ -1,6 +1,9 @@
 'use client'
 
-import { fetchHFSApi } from '@/app/actions'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState, useTransition } from 'react'
+import toast from 'react-hot-toast'
+import { fetchHFSApiFromServer } from '@/app/actions'
 import { HFS_APIs } from '@/app/constants'
 import { Button } from '@/components/button'
 import {
@@ -21,9 +24,6 @@ import {
   SelectValue,
 } from '@/components/select'
 import { GithubSVGIcon } from '@/components/svg'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState, useTransition } from 'react'
-import toast from 'react-hot-toast'
 
 enum loginRoleType {
   parent = 2,
@@ -40,7 +40,7 @@ export default function Login() {
   useEffect(() => {
     const token = localStorage.getItem('hfs_token')
     if (token) {
-      fetchHFSApi(HFS_APIs.userSnapshot, {
+      fetchHFSApiFromServer(HFS_APIs.userSnapshot, {
         token: token,
         method: 'GET',
       }).then((status) => {
@@ -60,17 +60,20 @@ export default function Login() {
         toast.error('你还没写账号/密码呢！！！')
         return
       }
-      const _token = await fetchHFSApi(HFS_APIs.login, {
-        method: 'POST',
-        token: '114514',
-        postBody: {
-          loginName: email,
-          password: btoa(password),
-          roleType: role,
-          loginType: 1,
-          rememberMe: 2,
+      const _token = await fetchHFSApiFromServer<{ token: string }>(
+        HFS_APIs.login,
+        {
+          method: 'POST',
+          token: '114514',
+          postBody: {
+            loginName: email,
+            password: btoa(password),
+            roleType: role,
+            loginType: '1',
+            rememberMe: '2',
+          },
         },
-      })
+      )
       if (!_token.ok) {
         toast.error(`登录失败，原因：${_token.errMsg}`)
         return
@@ -109,7 +112,10 @@ export default function Login() {
                 value={password}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    handleSubmit()
+                    handleSubmit().catch((err) => {
+                      console.error(err)
+                      toast.error('登录失败，请稍后再试')
+                    })
                   }
                 }}
                 onChange={(e) => setPassword(e.target.value)}

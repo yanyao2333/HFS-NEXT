@@ -1,9 +1,13 @@
 import './globals.css'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { Toaster } from 'react-hot-toast'
+import Providers from './provider'
 
 export default function RootLayout({
   children,
-}: { children: React.ReactNode }) {
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang='zh-CN'>
       <head>
@@ -32,7 +36,10 @@ export default function RootLayout({
         <title>HFS NEXT - 下一代好分数</title>
       </head>
       <body>
-        {children}
+        <Providers>
+          {children}
+          <ReactQueryDevtools initialIsOpen={false} />
+        </Providers>
         <Toaster />
       </body>
     </html>

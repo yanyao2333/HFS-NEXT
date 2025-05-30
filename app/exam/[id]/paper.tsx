@@ -1,18 +1,18 @@
 'use client'
 
-import { fetchHFSApi } from '@/app/actions'
-import { HFS_APIs } from '@/app/constants'
-import { Card, CardContent, CardHeader } from '@/components/card'
-import type { Paper, PaperRankInfo } from '@/types/exam'
-import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { Gallery, Item } from 'react-photoswipe-gallery'
+import { Card, CardContent, CardHeader } from '@/components/card'
+import type { BasicPaperInfo, PaperRankInfo } from '@/types/exam'
 import 'photoswipe/dist/photoswipe.css'
+import { useStorage } from '@/hooks/useStorage'
+import { usePaperImageUrlsQuery, useUserSnapshotQuery } from '@/hooks/queries'
+import { useRouter } from 'next/navigation'
 
 // 科目详情被隐藏时的样式
 export function PaperHidingComponent(props: {
-  paper: Paper
+  paper: BasicPaperInfo
   changeDisplayMode: (paperId: string) => void
 }) {
   return (
@@ -51,84 +51,30 @@ export function PaperHidingComponent(props: {
 export function PaperShowingComponent({
   paper,
   changeDisplayMode,
-  advancedMode,
-  router,
   examId,
-  setPapersObject,
 }: {
-  paper: Paper
+  paper: BasicPaperInfo
   changeDisplayMode: (paperId: string) => void
-  advancedMode: boolean
-  router: AppRouterInstance
-  examId: string
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  setPapersObject: (papersObject: any) => void
+  examId: number
 }) {
+  // TODO: 实施 rank 数据获取
   const [paperRankInfo, setPaperRankInfo] = useState<PaperRankInfo>()
-  const [answerPictureUrls, setAnswerPictureUrls] = useState<string[]>([])
-  const getPaperData = useCallback(
-    async (token: string) => {
-      const [paperRank, answerPicture] = (await Promise.allSettled([
-        fetchHFSApi(HFS_APIs.paperRankInfo, {
-          token: token,
-          method: 'GET',
-          getParams: {
-            examId: examId,
-            paperId: paper.paperId,
-          },
-        }),
-        fetchHFSApi(HFS_APIs.answerPicture, {
-          token: token,
-          method: 'GET',
-          getParams: {
-            paperId: paper.paperId,
-            pid: paper.pid,
-            examId: examId,
-          },
-        }),
-      ])) as unknown as PromiseFulfilledResult<{
-        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-        payload?: any
-        ok: boolean
-        errMsg?: string | undefined
-      }>[]
-      if (!paperRank.value.ok && advancedMode) {
-        toast.error(`获取答题卡排名信息失败：${paperRank.value.errMsg}`)
-      }
-      if (!answerPicture.value.ok) {
-        toast.error(`获取答题卡图片失败：${answerPicture.value.errMsg}`)
-      }
-
-      setPaperRankInfo(paperRank.value.payload)
-      setAnswerPictureUrls(
-        answerPicture.value.payload ? answerPicture.value.payload.url : [],
-      )
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-      setPapersObject((prevObject: any) => {
-        const updatedPaper = {
-          ...paper,
-          rank: paperRank.value.payload,
-          paperImages: answerPicture.value.payload.url,
-        }
-
-        return {
-          ...prevObject,
-          [updatedPaper.paperId]: updatedPaper,
-        }
-      })
-    },
-    [advancedMode, examId, paper, setPapersObject],
+  const [token] = useStorage('hfs_token')
+  const router = useRouter()
+  const { data: paperImageUrls } = usePaperImageUrlsQuery(
+    token,
+    examId,
+    paper.paperId,
+    paper.pid,
   )
+  const { data: userSnapshot } = useUserSnapshotQuery(token)
+  const advancedMode = userSnapshot?.isMember ?? false
 
-  useEffect(() => {
-    const token = localStorage.getItem('hfs_token')
-    if (!token) {
-      toast.error('你还没登录诶！')
-      router.push('/')
-      return
-    }
-    getPaperData(token).then()
-  }, [getPaperData, router])
+  if (!token) {
+    toast.error('请先登录')
+    router.push('/login')
+    return null
+  }
 
   return (
     <Card>
@@ -259,7 +205,7 @@ export function PaperShowingComponent({
             data-html2canvas-ignore='true'
             className='grid grid-flow-col gap-4'
           >
-            {answerPictureUrls.map((url, index) => {
+            {paperImageUrls?.map((url, index) => {
               return (
                 <Item
                   original={url}

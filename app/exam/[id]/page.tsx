@@ -1,34 +1,25 @@
 'use client'
-import { fetchHFSApi } from '@/app/actions'
-import { HFS_APIs } from '@/app/constants'
+import html2canvas from 'html2canvas'
+import { useRouter } from 'next/navigation'
+import { use, useCallback, useRef, useState } from 'react'
+import toast from 'react-hot-toast'
 import {
   PaperHidingComponent,
   PaperShowingComponent,
 } from '@/app/exam/[id]/paper'
-import Snapshot from '@/app/exam/[id]/snapshot'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/card'
 import Navbar from '@/components/navBar'
 import { GithubSVGIcon } from '@/components/svg'
-import type {
-  ExamObject,
-  ExamRankInfo,
-  PapersObject,
-  UserSnapshot,
-} from '@/types/exam'
+import type { ExamObject, ExamRankInfo } from '@/types/exam'
 import { formatTimestamp } from '@/utils/time'
-import {
-  Chart as ChartJS,
-  Filler,
-  Legend,
-  LineElement,
-  PointElement,
-  RadialLinearScale,
-  Tooltip,
-} from 'chart.js'
-import html2canvas from 'html2canvas'
-import { useRouter } from 'next/navigation'
-import { use, useCallback, useEffect, useRef, useState } from 'react'
-import toast from 'react-hot-toast'
+import { useExamOverviewQuery, useUserSnapshotQuery } from '@/hooks/queries'
+import { useStorage } from '@/hooks/useStorage'
 
 function RankInfoComponent({
   rankInfo,
@@ -79,106 +70,30 @@ function RankInfoComponent({
 
 export default function ExamPage(props: { params: Promise<{ id: string }> }) {
   const params = use(props.params)
-  ChartJS.register(
-    RadialLinearScale,
-    PointElement,
-    LineElement,
-    Filler,
-    Tooltip,
-    Legend,
-  )
   const router = useRouter()
-  const [advancedMode, setAdvancedMode] = useState<boolean>(false)
-  const [examObject, setExamObject] = useState<ExamObject>()
   const [displayedPapersMode, setDisplayedPapersMode] = useState<{
     [index: string]: boolean
-  }>({}) // true为显示 false为隐藏
-  const [userSnapshot, setUserSnapshot] = useState<UserSnapshot>()
-  const [isExamSnapshotWindowOpen, setIsExamSnapshotWindowOpen] =
-    useState(false)
+  }>({})
   const pageRef = useRef(null)
-  const [papersObject, setPapersObject] = useState<PapersObject>()
+  const [token, setToken] = useStorage('hfs_token')
+  const { data: userSnapshot } = useUserSnapshotQuery(token)
+  const advancedMode = userSnapshot?.isMember ?? false
+  const {
+    data: examOverview,
+    isError: isExamOverviewError,
+    isPending: isExamOverviewPending,
+  } = useExamOverviewQuery(token, params.id)
 
-  const getExamObject = useCallback(
-    async (token: string) => {
-      const [details, examRank, userSnapshot] = (await Promise.allSettled([
-        fetchHFSApi(HFS_APIs.examOverview, {
-          token: token,
-          method: 'GET',
-          getParams: {
-            examId: params.id,
-          },
-        }),
-        fetchHFSApi(HFS_APIs.examRankInfo, {
-          token: token,
-          method: 'GET',
-          getParams: {
-            examId: params.id,
-          },
-        }),
-        fetchHFSApi(HFS_APIs.userSnapshot, {
-          token: token,
-          method: 'GET',
-        }),
-      ])) as unknown as PromiseFulfilledResult<{
-        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-        payload?: any
-        ok: boolean
-        errMsg?: string | undefined
-      }>[] // 我们在fetch中做了错误捕捉，所以不会为rejected
-      if (details.value.ok) {
-        setExamObject((prevExamObject) => ({
-          ...prevExamObject,
-          detail: details.value.payload,
-        }))
-      } else {
-        toast.error(`调用好分数API「考试详情」失败：${details.value.errMsg}`)
-      }
-      if (!examRank.value.ok && advancedMode) {
-        toast.error(
-          `调用好分数API「考试排名信息」失败：${examRank.value.errMsg}`,
-        )
-      }
-      setExamObject((prevExamObject) => ({
-        ...prevExamObject,
-        rank: examRank.value.payload,
-      }))
-      if (!userSnapshot.value.ok) {
-        toast.error(`调用好分数API失败：${userSnapshot.value.errMsg}`)
-      }
-      // 根据是否是会员决定是否开启高级模式
-      if (userSnapshot.value.payload.isMember) {
-        setAdvancedMode(true)
-      }
-      setUserSnapshot(userSnapshot.value.payload)
-    },
-    [advancedMode, params.id],
-  )
-
-  useEffect(() => {
-    const token = localStorage.getItem('hfs_token')
-    if (!token) {
-      toast.error('你还没登录诶！')
-      router.push('/login')
-      return
-    }
-    getExamObject(token).then()
-    // const localAdvancedMode = localStorage.getItem("advancedMode");
-    // if (localAdvancedMode) {
-    //   setAdvancedMode("1" === localAdvancedMode);
-    // }
-  }, [getExamObject, router])
-
-  function changeDisplayedMode(paperId: string) {
+  const changeDisplayedMode = useCallback((paperId: string) => {
     setDisplayedPapersMode((prevState) => {
       return {
         ...prevState,
         [paperId]: !prevState[paperId],
       }
     })
-  }
+  }, [])
 
-  async function createScreenshot() {
+  const createScreenshot = useCallback(async () => {
     if (!pageRef.current) {
       throw new Error('组件根节点ref为null???')
     }
@@ -191,6 +106,34 @@ export default function ExamPage(props: { params: Promise<{ id: string }> }) {
     link.href = dataURL
     link.download = `exam_${params.id}_screenshot.png`
     link.click()
+  }, [params.id])
+
+  if (!token) {
+    toast.error('你还没登录，返回登录页')
+    router.push('/login')
+    return null
+  }
+
+  if (isExamOverviewError) {
+    toast.error('获取考试详情失败，请稍后再试')
+    return null
+  }
+
+  if (isExamOverviewPending) {
+    return (
+      <div className='flex min-h-screen items-center justify-center p-4'>
+        <Card className='w-full max-w-3xl'>
+          <CardHeader>
+            <CardTitle className='font-bold text-2xl'>正在加载...</CardTitle>
+            <CardDescription>正在获取您的数据，请稍候。</CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    )
+  }
+
+  const examObject: ExamObject = {
+    detail: examOverview,
   }
 
   return (
@@ -198,13 +141,7 @@ export default function ExamPage(props: { params: Promise<{ id: string }> }) {
       className='mx-auto flex min-h-screen select-none flex-col bg-white px-4 pt-6 pb-2 md:px-4 md:pt-6 md:pb-2 dark:bg-gray-900'
       ref={pageRef}
     >
-      <Navbar
-        router={router}
-        userName={
-          userSnapshot ? userSnapshot.linkedStudent.studentName : 'xxx家长'
-        }
-        snapshotMode={false}
-      />
+      <Navbar />
       <div className='flex flex-col gap-6 pt-6'>
         <Card>
           <CardHeader>
@@ -215,12 +152,7 @@ export default function ExamPage(props: { params: Promise<{ id: string }> }) {
               data-html2canvas-ignore='true'
               className='flex flex-row gap-3 pt-3'
             >
-              <div
-                onClick={() => {
-                  setIsExamSnapshotWindowOpen(true)
-                }}
-                className='flex-grow-0 cursor-pointer rounded-full border border-gray-400 p-1 hover:bg-gray-200'
-              >
+              <div className='flex-grow-0 cursor-pointer rounded-full border border-gray-400 p-1 hover:bg-gray-200'>
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
                   fill='none'
@@ -243,7 +175,6 @@ export default function ExamPage(props: { params: Promise<{ id: string }> }) {
                     createScreenshot(),
                     {
                       loading: '正在截图',
-                      // success: "成功创建并下载截图！（答题卡图片空白是正常的）",
                       success: (
                         <span>
                           成功创建并下载截图！
@@ -352,16 +283,6 @@ export default function ExamPage(props: { params: Promise<{ id: string }> }) {
               </div>
             )}
             {advancedMode && <RankInfoComponent rankInfo={examObject?.rank} />}
-            {/* 快照弹窗 */}
-            {isExamSnapshotWindowOpen && (
-              <Snapshot
-                onClose={() => {
-                  setIsExamSnapshotWindowOpen(false)
-                }}
-                examObject={examObject}
-                papersObject={papersObject}
-              />
-            )}
           </CardContent>
         </Card>
         <Card>
@@ -370,25 +291,20 @@ export default function ExamPage(props: { params: Promise<{ id: string }> }) {
           </CardHeader>
           <CardContent>
             <div className='grid gap-4'>
-              {examObject?.detail?.papers?.map((item) => {
+              {examObject.detail.papers.map((item) => {
                 const isDisplayed = displayedPapersMode[item.paperId]
 
-                const commonProps = {
-                  paper: item,
-                  changeDisplayMode: changeDisplayedMode,
-                }
                 return isDisplayed ? (
                   <PaperShowingComponent
-                    {...commonProps}
                     key={item.paperId}
-                    advancedMode={advancedMode}
-                    router={router}
-                    examId={String(examObject?.detail?.examId)}
-                    setPapersObject={setPapersObject}
+                    paper={item}
+                    changeDisplayMode={changeDisplayedMode}
+                    examId={examObject.detail.examId}
                   />
                 ) : (
                   <PaperHidingComponent
-                    {...commonProps}
+                    changeDisplayMode={changeDisplayedMode}
+                    paper={item}
                     key={item.paperId}
                   />
                 )
@@ -401,7 +317,7 @@ export default function ExamPage(props: { params: Promise<{ id: string }> }) {
         <div />
         <div className='flex flex-col justify-between pt-2 md:flex-row'>
           <span className='flex items-center text-gray-500 text-xs'>
-            Open Source by UselessLab on
+            Open Source by Roitium on
             <span className='ml-1 inline-flex items-center'>
               <a
                 href='https://github.com/yanyao2333/HFS-NEXT'

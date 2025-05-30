@@ -1,16 +1,14 @@
 'use client'
 
-import { fetchHFSApi } from '@/app/actions'
-import { HFS_APIs } from '@/app/constants'
-import Navbar from '@/components/navBar'
-import { GithubSVGIcon } from '@/components/svg'
-import type { UserSnapshot } from '@/types/exam'
-import { formatTimestamp } from '@/utils/time'
 import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { type JSX, type SVGProps, useEffect, useState } from 'react'
+import type { JSX, SVGProps } from 'react'
 import toast from 'react-hot-toast'
+import Navbar from '@/components/navBar'
+import { GithubSVGIcon } from '@/components/svg'
+import { useExamListQuery } from '@/hooks/queries'
+import { useStorage } from '@/hooks/useStorage'
 
 // 卡片组件
 function ExamCard({
@@ -46,69 +44,23 @@ function ExamCard({
 }
 
 export default function ExamSelector() {
-  const [examList, setExams] = useState<
-    { name: string; score: string; released: string; examId: string }[]
-  >([])
   const router = useRouter()
-  const [userSnapshot, setUserSnapshot] = useState<UserSnapshot>()
+  const [token, setToken] = useStorage('hfs_token')
+  const { data: examList, isError } = useExamListQuery(token)
 
-  useEffect(() => {
-    const token = localStorage.getItem('hfs_token')
-    if (!token) {
-      setTimeout(() => {
-        toast.error('你还没登录，返回登录页')
-        router.push('/login')
-      })
-      return
-    }
-    fetchHFSApi(HFS_APIs.examList, {
-      method: 'GET',
-      token: token,
-    }).then((exams) => {
-      if (!exams.ok) {
-        toast.error(`获取考试列表失败：${exams.errMsg}`)
-        return
-      }
-      if (!exams.payload.list) {
-        toast.error(`获取考试列表失败：${exams.errMsg}`)
-        return
-      }
-      const newExams = []
-      for (const exam of exams.payload.list) {
-        newExams.push({
-          name: exam.name,
-          score: `${exam.score}/${exam.manfen}`,
-          released: formatTimestamp(exam.time),
-          examId: exam.examId,
-        })
-      }
-      setExams(newExams)
-    })
-    fetchHFSApi(HFS_APIs.userSnapshot, {
-      token: token,
-      method: 'GET',
-    }).then((exams) => {
-      if (!exams.ok) {
-        toast.error(`获取用户信息失败：${exams.errMsg}`)
-        return
-      }
-      if (!exams.payload) {
-        toast.error(`获取用户信息失败：${exams.errMsg}`)
-        return
-      }
-      setUserSnapshot(exams.payload)
-    })
-  }, [router])
+  if (!token) {
+    toast.error('你还没登录，返回登录页')
+    router.push('/login')
+  }
+
+  if (isError) {
+    toast.error('获取考试列表失败，请稍后再试')
+    return null
+  }
 
   return (
     <div className='mx-auto flex min-h-screen select-none flex-col bg-white px-4 pt-6 pb-2 md:px-4 md:pt-6 md:pb-2 dark:bg-gray-900'>
-      <Navbar
-        userName={
-          userSnapshot ? userSnapshot.linkedStudent.studentName : 'xxx家长'
-        }
-        router={router}
-        snapshotMode={false}
-      />
+      <Navbar />
       <div className='mt-3 max-w-[600px] self-center rounded-lg bg-sky-400 px-4 py-3 font-medium text-white shadow-md'>
         <div className='flex flex-wrap items-center justify-between'>
           <div className='mr-5 flex flex-1 items-center truncate font-medium'>
@@ -126,7 +78,7 @@ export default function ExamSelector() {
         </div>
       </div>
       <div className=' grid gap-6 pt-6 md:grid-cols-2 md:pt-6 lg:grid-cols-3 xl:grid-cols-4'>
-        {examList.map((exam) => {
+        {examList?.map((exam) => {
           return (
             <ExamCard
               key={exam.examId}

@@ -1,18 +1,20 @@
 export interface UserSnapshot {
   linkedStudent: {
     studentName: string
+    schoolName: string
   }
+  isMember: boolean
 }
 
 export interface ExamObject {
-  detail?: ExamDetail
+  detail: ExamDetail
   rank?: ExamRankInfo
 }
 
-export type PapersObject = { [paperId: string]: Paper }
+export type PapersObject = { [paperId: string]: BasicPaperInfo }
 
 // 包含在试卷详情中的每科粗略信息
-export interface Paper {
+export interface BasicPaperInfo {
   paperId: string
   pid: string
   name: string
@@ -21,8 +23,6 @@ export interface Paper {
   score: number
   // 1为优 2为正常 可能3为劣
   weakAdvantageStatus: number
-  rank?: PaperRankInfo
-  paperImages?: string[]
 }
 
 // 获取到的试卷详情
@@ -40,7 +40,7 @@ export interface ExamDetail {
   gradeDefeatRatio: number
   classRankPart: string
   gradeRankPart: string
-  papers: Paper[]
+  papers: BasicPaperInfo[]
   classRankS: string
   gradeRankS: string
 }
@@ -102,3 +102,37 @@ export interface PaperRankInfo {
     grade: string
   }
 }
+
+export type ExamListResponse = {
+  list: {
+    name: string
+    score: number
+    manfen: number
+    time: number
+    examId: string
+  }[]
+}
+
+export type LastExamOverview =
+  | {
+      examId: number
+      subjectNumber: number
+      isManfen: boolean
+      classDefeatLevel: number
+      gradeDefeatLevel: number
+      extend: {
+        classRank: number
+        classStuNum: number
+        classDefeatRatio: number
+        gradeRank: number
+        gradeStuNum: number
+        gradeDefeatRatio: number
+      }
+      worstSubjectText: string
+      simpleQuestionLostScores: number
+      middleQuestionLostScores: number
+      hardQuestionLostScores: number
+      scoreRaise: number
+      rankRaise: number
+    }
+  | Record<string, never>
